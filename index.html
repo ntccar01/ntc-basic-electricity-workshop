@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-TW" data-theme="sunset">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>基本電學練工坊｜跟著一島一站一站學會電學的相關知識與概念</title>
+  <meta name="description" content="跟著一島一站一站學會電學的相關知識與概念 — 由 NTC-CAR 製作的 3D 課程群島互動學習網站。" />
+  <meta name="author" content="NTC-CAR" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23c45a2c'/%3E%3Cpath d='M36 8 L16 36 H30 L26 56 L48 28 H34 Z' fill='%23fffaf2'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <!-- 頂部導覽與主題控制列 -->
+  <header id="top-bar" role="banner">
+    <div class="brand-card">
+      <button type="button" class="mascot-avatar" id="btn-mascot-greet" title="點我聽泓哥導覽（戴方眼鏡、穿藍色工作服及工作褲）" aria-label="吉祥物泓哥導覽">
+        <!-- 泓哥 Q 版 SVG：戴方眼鏡、穿藍色工作服及工作褲 -->
+        <svg viewBox="0 0 64 64" width="44" height="44" role="img" aria-label="泓哥戴方眼鏡、穿藍色工作服及褲子">
+          <rect width="64" height="64" rx="12" fill="#e6f2f0" />
+          <!-- 藍色工作服與工作褲 -->
+          <path d="M14 62 L18 42 Q32 38 46 42 L50 62 Z" fill="#1e5aa8" />
+          <rect x="23" y="44" width="18" height="18" fill="#15427e" />
+          <line x1="32" y1="53" x2="32" y2="62" stroke="#0d2b54" stroke-width="2" />
+          <!-- 工作服吊帶與口袋 -->
+          <rect x="21" y="41" width="4" height="10" fill="#2b72cf" />
+          <rect x="39" y="41" width="4" height="10" fill="#2b72cf" />
+          <rect x="27" y="48" width="10" height="6" rx="1" fill="#f3b63f" />
+          <!-- 頭部與髮型 -->
+          <circle cx="32" cy="26" r="13" fill="#f7d2b4" />
+          <path d="M18 23 Q20 11 32 11 Q44 11 46 23 Q40 17 32 18 Q24 17 18 23 Z" fill="#2b211c" />
+          <!-- 招牌方眼鏡 -->
+          <rect x="21" y="21" width="9" height="7" rx="1" fill="#ffffff" fill-opacity="0.65" stroke="#1a1a1a" stroke-width="2.4" />
+          <rect x="34" y="21" width="9" height="7" rx="1" fill="#ffffff" fill-opacity="0.65" stroke="#1a1a1a" stroke-width="2.4" />
+          <line x1="30" y1="24" x2="34" y2="24" stroke="#1a1a1a" stroke-width="2.4" />
+          <circle cx="25.5" cy="24.5" r="1.5" fill="#1a1a1a" />
+          <circle cx="38.5" cy="24.5" r="1.5" fill="#1a1a1a" />
+          <!-- 微笑 -->
+          <path d="M28 32 Q32 35.5 36 32" fill="none" stroke="#8c3b2b" stroke-width="2.2" stroke-linecap="round" />
+        </svg>
+      </button>
+      <div class="brand-text">
+        <h1 id="site-title">基本電學練工坊</h1>
+        <p id="site-tagline">跟著一島一站一站學會電學的相關知識與概念 · <span id="site-author">NTC-CAR</span></p>
+      </div>
+    </div>
+
+    <div class="top-controls" role="toolbar" aria-label="主題與環境控制">
+      <div class="theme-switcher" role="group" aria-label="三組底色切換">
+        <button type="button" class="theme-btn active" data-theme-opt="sunset" aria-pressed="true">
+          <span class="swatch" style="background:#fbefe3;"></span>夕陽
+        </button>
+        <button type="button" class="theme-btn" data-theme-opt="beach" aria-pressed="false">
+          <span class="swatch" style="background:#f6ead2;"></span>沙灘
+        </button>
+        <button type="button" class="theme-btn" data-theme-opt="dusk" aria-pressed="false">
+          <span class="swatch" style="background:#2b1e1a;"></span>暮色
+        </button>
+      </div>
+
+      <button type="button" class="btn" id="btn-daynight" title="切換 3D 光線：白天／黃昏／夜晚">
+        <span id="daynight-icon">☀️</span> <span id="daynight-label">白天光線</span>
+      </button>
+
+      <button type="button" class="btn" id="btn-daily-key" title="使用每日鑰匙開啟電學寶箱收集圖鑑卡">
+        🔑 每日鑰匙 <span id="daily-key-count">3/3</span>
+      </button>
+
+      <div class="status-pill" id="clock-pill" aria-live="polite" title="即時時鐘與目前天色">
+        🕒 <span id="clock-text">--:--</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- 3D 群島舞台 -->
+  <main id="stage-wrap">
+    <canvas id="webgl-canvas" aria-label="基本電學練工坊 3D 群島場景"></canvas>
+    <div id="labels-layer" role="region" aria-label="3D 島嶼快速標籤"></div>
+  </main>
+
+  <!-- WebGL 關閉或失敗時的文字清單備援區（確保無 WebGL 時仍可讀完所有內容） -->
+  <section id="webgl-fallback" hidden aria-label="文字清單完整閱讀模式">
+    <div class="section-card">
+      <h2>📚 基本電學練工坊 — 課程群島文字總覽（無 WebGL 備援模式）</h2>
+      <p>目前處於文字清單模式，您仍可直接點選下方任一座島嶼閱讀完整教材、填寫學習單並進行隨堂測驗與總複習測驗。</p>
+      <div id="fallback-list-container" class="island-list-grid"></div>
+    </div>
+  </section>
+
+  <!-- 側邊／底部課程內容抽屜面板 -->
+  <aside id="island-drawer" class="drawer-panel" hidden aria-label="島嶼課程內容面板">
+    <div class="drawer-header">
+      <div class="drawer-title-group">
+        <div class="drawer-badges" id="drawer-badges"></div>
+        <h2 id="drawer-title">島嶼名稱</h2>
+      </div>
+      <button type="button" class="btn" id="btn-close-drawer" aria-label="關閉面板 (Esc)">✕ 關閉</button>
+    </div>
+    <div class="drawer-tabs" id="drawer-tabs" role="tablist"></div>
+    <div class="drawer-body" id="drawer-body"></div>
+  </aside>
+
+  <!-- 底部功能工具列（手機與桌機大按鈕設計） -->
+  <nav id="bottom-bar" aria-label="主要學習與互動工具列">
+    <div class="dock-inner">
+      <div class="search-box" role="search">
+        <input type="search" id="search-input" placeholder="搜尋島嶼／公式／概念…" aria-label="搜尋島嶼與電學內容" />
+        <button type="button" class="btn btn-primary" id="btn-search" aria-label="執行搜尋">🔍 搜尋</button>
+      </div>
+
+      <button type="button" class="btn" id="btn-list">📋 地點清單</button>
+      <button type="button" class="btn" id="btn-reset-cam">🌏 回到全景</button>
+      <button type="button" class="btn btn-accent" id="btn-center-island">🏛️ 圖書館＆總複習</button>
+      <button type="button" class="btn" id="btn-collection">🃏 收集圖鑑 <span id="collection-badge">0/12</span></button>
+      <button type="button" class="btn" id="btn-guide">👓 泓哥問答</button>
+      <button type="button" class="btn" id="btn-certificate">🎓 進度＆證書 <span id="progress-badge">0%</span></button>
+      <button type="button" class="btn" id="btn-savecode">💾 接關碼</button>
+      <button type="button" class="btn" id="btn-share">📤 分享卡片</button>
+      <button type="button" class="btn" id="btn-music" aria-pressed="false">🎵 背景音樂：關</button>
+      <button type="button" class="btn" id="btn-motion" aria-pressed="false">🐢 減少動態：關</button>
+      <button type="button" class="btn" id="btn-help" aria-label="操作說明">❓ 說明</button>
+    </div>
+  </nav>
+
+  <!-- 通用功能對話框 Modal -->
+  <div id="app-modal" class="modal-backdrop" hidden role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 id="modal-title">功能視窗</h2>
+        <button type="button" class="btn" id="btn-close-modal" aria-label="關閉視窗 (Esc)">✕ 關閉</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- 提示訊息容器 -->
+  <div id="toast-container" aria-live="polite"></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

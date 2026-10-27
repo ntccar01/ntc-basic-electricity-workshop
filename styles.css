@@ -1,0 +1,938 @@
+/* 基本電學練工坊 - 雲海仙境 3D 課程群島樣式表 */
+:root,
+html[data-theme="sunset"] {
+  --bg: #fbefe3;
+  --surface: rgba(255, 250, 245, 0.94);
+  --surface-solid: #fffaf5;
+  --surface-alt: #f4e2d0;
+  --ink: #231712;
+  --muted: #5c4438;
+  --line: #dec5b0;
+  --primary: #c45a2c;
+  --primary-hover: #a6461d;
+  --primary-ink: #ffffff;
+  --accent: #2f8f83;
+  --accent-soft: rgba(47, 143, 131, 0.14);
+  --shadow: 0 10px 30px rgba(45, 24, 14, 0.16);
+  --label-bg: rgba(255, 251, 247, 0.94);
+  --label-border: #c45a2c;
+  --badge-sample-bg: #fff0d6;
+  --badge-sample-ink: #8a4b08;
+  --success: #1f7a4c;
+  --danger: #b92b27;
+}
+
+html[data-theme="beach"] {
+  --bg: #f6ead2;
+  --surface: rgba(253, 248, 236, 0.95);
+  --surface-solid: #fdf8ec;
+  --surface-alt: #ead8b5;
+  --ink: #221b10;
+  --muted: #574a35;
+  --line: #d4c098;
+  --primary: #b85022;
+  --primary-hover: #983f18;
+  --primary-ink: #ffffff;
+  --accent: #237a6f;
+  --accent-soft: rgba(35, 122, 111, 0.15);
+  --shadow: 0 10px 30px rgba(40, 30, 12, 0.16);
+  --label-bg: rgba(254, 250, 240, 0.95);
+  --label-border: #b85022;
+  --badge-sample-bg: #fcedc8;
+  --badge-sample-ink: #784205;
+  --success: #1b6e44;
+  --danger: #b3261e;
+}
+
+html[data-theme="dusk"] {
+  --bg: #2b1e1a;
+  --surface: rgba(50, 36, 31, 0.95);
+  --surface-solid: #352621;
+  --surface-alt: #46332c;
+  --ink: #f9efe6;
+  --muted: #d7c0b0;
+  --line: #63493f;
+  --primary: #e06d3b;
+  --primary-hover: #f07f4e;
+  --primary-ink: #1a0f0c;
+  --accent: #4cc4b5;
+  --accent-soft: rgba(76, 196, 181, 0.18);
+  --shadow: 0 12px 34px rgba(0, 0, 0, 0.48);
+  --label-bg: rgba(43, 30, 26, 0.94);
+  --label-border: #e06d3b;
+  --badge-sample-bg: #4d351b;
+  --badge-sample-ink: #ffd599;
+  --success: #5cd696;
+  --danger: #ff7b75;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 100vw;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: "Noto Sans TC", "Microsoft JhengHei", "PingFang TC", sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 1rem;
+  color: inherit;
+}
+
+/* 放大版按鈕（符合使用者「手機按鈕大一點」及 >= 48px 無障礙要求） */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 48px;
+  min-width: 48px;
+  padding: 0.6rem 1.05rem;
+  border-radius: 14px;
+  border: 1.5px solid var(--line);
+  background: var(--surface-solid);
+  color: var(--ink);
+  font-weight: 700;
+  font-size: 0.96rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.15s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  user-select: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.btn:hover {
+  border-color: var(--primary);
+  background: var(--surface-alt);
+}
+
+.btn:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: var(--primary-ink);
+  border-color: var(--primary);
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+.btn-accent {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+}
+
+html[data-theme="dusk"] .btn-accent {
+  color: #102421;
+}
+
+.btn-active,
+.btn[aria-pressed="true"] {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary);
+  background: var(--surface-alt);
+}
+
+/* 3D 畫布與主舞台 */
+#stage-wrap {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  overflow: hidden;
+}
+
+#webgl-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+
+#labels-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 2;
+}
+
+/* 3D 島嶼 HTML 標籤（只放島名＋編號＋簡短狀態，不堆疊多餘文字） */
+.island-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -100%);
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  padding: 0.42rem 0.85rem;
+  border-radius: 999px;
+  background: var(--label-bg);
+  border: 2px solid var(--label-border);
+  color: var(--ink);
+  font-weight: 800;
+  font-size: 0.92rem;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  z-index: 5;
+}
+
+.island-label:hover,
+.island-label:focus-visible {
+  background: var(--primary);
+  color: var(--primary-ink);
+  z-index: 20;
+  outline: 3px solid var(--accent);
+}
+
+.island-label.center-label {
+  border-color: var(--accent);
+  border-width: 2.5px;
+  font-size: 0.98rem;
+  padding: 0.48rem 1rem;
+}
+
+.island-label .num-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: var(--primary-ink);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.island-label.center-label .num-badge {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.island-label .status-dot {
+  font-size: 0.82rem;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.island-label:hover .status-dot {
+  color: var(--primary-ink);
+}
+
+/* 頂部標題與工具列 */
+#top-bar {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  z-index: 30;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.brand-card {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  backdrop-filter: blur(10px);
+  border: 1.5px solid var(--line);
+  border-radius: 18px;
+  padding: 8px 16px;
+  box-shadow: var(--shadow);
+  max-width: 100%;
+}
+
+.mascot-avatar {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: var(--surface-alt);
+  border: 1.5px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.brand-text h1 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  line-height: 1.25;
+}
+
+.brand-text p {
+  margin: 2px 0 0;
+  font-size: 0.84rem;
+  color: var(--muted);
+}
+
+.top-controls {
+  pointer-events: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  backdrop-filter: blur(10px);
+  border: 1.5px solid var(--line);
+  border-radius: 18px;
+  padding: 8px 12px;
+  box-shadow: var(--shadow);
+}
+
+/* 三組底色切換按鈕群 */
+.theme-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding-right: 6px;
+  border-right: 1.5px solid var(--line);
+  flex-shrink: 0;
+}
+
+.theme-btn {
+  min-height: 46px;
+  padding: 0.4rem 0.75rem;
+  border-radius: 12px;
+  border: 1.5px solid var(--line);
+  background: var(--surface-solid);
+  color: var(--ink);
+  font-weight: 700;
+  font-size: 0.88rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.theme-btn.active {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary);
+  background: var(--surface-alt);
+}
+
+.swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0, 0, 0, 0.35);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* 時鐘與每日鑰匙徽章 */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 46px;
+  padding: 0.35rem 0.8rem;
+  border-radius: 12px;
+  background: var(--surface-alt);
+  color: var(--ink);
+  font-weight: 700;
+  font-size: 0.88rem;
+  border: 1px solid var(--line);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* 底部快捷工具列 */
+#bottom-bar {
+  position: fixed;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  z-index: 30;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.dock-inner {
+  pointer-events: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--surface);
+  backdrop-filter: blur(10px);
+  border: 1.5px solid var(--line);
+  border-radius: 20px;
+  padding: 8px 12px;
+  box-shadow: var(--shadow);
+  max-width: 100%;
+}
+
+/* 搜尋列內嵌 */
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface-solid);
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  padding: 2px 10px;
+  min-height: 48px;
+  flex-shrink: 0;
+}
+
+.search-box input {
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  width: 150px;
+  min-height: 42px;
+  outline: none;
+  font-size: 0.95rem;
+}
+
+/* 側邊內容面板（桌機右側抽屜，手機底部抽屜） */
+.drawer-panel {
+  position: fixed;
+  top: 84px;
+  right: 16px;
+  bottom: 132px;
+  width: min(560px, calc(100vw - 32px));
+  background: var(--surface);
+  backdrop-filter: blur(14px);
+  border: 2px solid var(--line);
+  border-radius: 22px;
+  box-shadow: var(--shadow);
+  z-index: 48;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.drawer-panel[hidden] {
+  display: none !important;
+}
+
+.drawer-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1.5px solid var(--line);
+  background: var(--surface-solid);
+}
+
+.drawer-title-group h2 {
+  margin: 4px 0 0;
+  font-size: 1.35rem;
+  font-weight: 900;
+}
+
+.drawer-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: var(--accent-soft);
+  color: var(--ink);
+  border: 1px solid var(--accent);
+}
+
+.badge-sample {
+  background: var(--badge-sample-bg);
+  color: var(--badge-sample-ink);
+  border: 1px solid var(--badge-sample-ink);
+}
+
+.drawer-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 10px 20px;
+  background: var(--surface-alt);
+  border-bottom: 1.5px solid var(--line);
+  overflow-x: auto;
+}
+
+.tab-btn {
+  flex: 1;
+  min-height: 48px;
+  padding: 0.5rem 0.9rem;
+  border-radius: 12px;
+  border: 1.5px solid var(--line);
+  background: var(--surface-solid);
+  color: var(--ink);
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tab-btn.active {
+  background: var(--primary);
+  color: var(--primary-ink);
+  border-color: var(--primary);
+}
+
+.drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+/* 教材卡片與重點清單 */
+.mascot-tip-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--accent-soft);
+  border: 1.5px solid var(--accent);
+  margin-bottom: 16px;
+}
+
+.mascot-tip-box .tip-content {
+  font-size: 0.95rem;
+}
+
+.section-card {
+  background: var(--surface-solid);
+  border: 1.5px solid var(--line);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.section-card h3 {
+  margin: 0 0 10px;
+  font-size: 1.1rem;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+html[data-theme="dusk"] .section-card h3 {
+  color: #ff9c6e;
+}
+
+.point-item {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--surface-alt);
+  margin-bottom: 10px;
+  font-size: 0.96rem;
+  border-left: 4px solid var(--accent);
+}
+
+/* 學習單表單 */
+.worksheet-item {
+  background: var(--surface-solid);
+  border: 1.5px solid var(--line);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.worksheet-item label {
+  display: block;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.worksheet-item textarea {
+  width: 100%;
+  min-height: 96px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1.5px solid var(--line);
+  background: var(--bg);
+  color: var(--ink);
+  resize: vertical;
+}
+
+/* 隨堂測驗與總複習測驗 */
+.quiz-question {
+  background: var(--surface-solid);
+  border: 1.5px solid var(--line);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.quiz-question h4 {
+  margin: 0 0 12px;
+  font-size: 1.02rem;
+}
+
+.quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.quiz-option-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1.5px solid var(--line);
+  background: var(--bg);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.quiz-option-label:hover {
+  border-color: var(--primary);
+}
+
+.quiz-option-label input[type="radio"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--primary);
+}
+
+.quiz-explanation {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--surface-alt);
+  border-left: 4px solid var(--accent);
+  font-size: 0.92rem;
+}
+
+.quiz-explanation.correct {
+  border-left-color: var(--success);
+}
+
+.quiz-explanation.wrong {
+  border-left-color: var(--danger);
+}
+
+/* 彈出視窗／功能對話框（地點清單、圖鑑、小嚮導、證書、接關碼、分享、說明） */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 10, 8, 0.58);
+  backdrop-filter: blur(4px);
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.modal-backdrop[hidden] {
+  display: none !important;
+}
+
+.modal-card {
+  width: min(760px, 100%);
+  max-height: min(86vh, 820px);
+  background: var(--surface-solid);
+  border: 2px solid var(--line);
+  border-radius: 22px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1.5px solid var(--line);
+  background: var(--surface-alt);
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 900;
+}
+
+.modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* 地點清單與無 WebGL 完整閱讀模式 */
+.group-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.island-list-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.island-list-card {
+  background: var(--bg);
+  border: 1.5px solid var(--line);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.island-list-card h3 {
+  margin: 4px 0;
+  font-size: 1.12rem;
+}
+
+/* 圖鑑卡片網格 */
+.collection-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 12px;
+}
+
+.collect-card {
+  background: var(--bg);
+  border: 1.5px solid var(--line);
+  border-radius: 16px;
+  padding: 14px;
+}
+
+.collect-card.locked {
+  opacity: 0.68;
+  border-style: dashed;
+}
+
+.collect-card .card-icon {
+  font-size: 2rem;
+  margin-bottom: 6px;
+}
+
+/* 色碼表 */
+.color-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.color-table th,
+.color-table td {
+  border: 1px solid var(--line);
+  padding: 8px 10px;
+  text-align: center;
+}
+
+.color-table th {
+  background: var(--surface-alt);
+}
+
+/* 通知 Toast */
+#toast-container {
+  position: fixed;
+  top: 86px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast-msg {
+  background: var(--ink);
+  color: var(--bg);
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-weight: 700;
+  box-shadow: var(--shadow);
+  font-size: 0.92rem;
+}
+
+/* WebGL 失敗或關閉時的文字清單備援區 */
+#webgl-fallback {
+  position: relative;
+  z-index: 10;
+  padding: 110px 16px 110px;
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+/* 響應式：平板 (<= 900px) 與手機 (<= 640px, 包含 375px) */
+@media (max-width: 900px) {
+  #top-bar {
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    gap: 6px;
+  }
+
+  .brand-card {
+    padding: 6px 12px;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .top-controls {
+    width: 100%;
+    justify-content: space-between;
+    padding: 6px 10px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
+
+  .drawer-panel {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: 100vw;
+    height: 78vh;
+    border-radius: 24px 24px 0 0;
+    border-bottom: none;
+    z-index: 55;
+  }
+}
+
+@media (max-width: 600px) {
+  .brand-text h1 {
+    font-size: 1.05rem;
+  }
+
+  .brand-text p {
+    font-size: 0.78rem;
+  }
+
+  .btn {
+    min-height: 48px;
+    padding: 0.55rem 0.85rem;
+    font-size: 0.9rem;
+  }
+
+  #bottom-bar {
+    bottom: 6px;
+    left: 6px;
+    right: 6px;
+  }
+
+  .dock-inner {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 6px 8px;
+    border-radius: 16px;
+  }
+
+  .search-box input {
+    width: 115px;
+  }
+
+  .island-label {
+    font-size: 0.8rem;
+    padding: 0.32rem 0.65rem;
+    min-height: 40px;
+  }
+
+  .modal-backdrop {
+    padding: 8px;
+    align-items: flex-end;
+  }
+
+  .modal-card {
+    width: 100%;
+    max-height: 88vh;
+    border-radius: 22px 22px 0 0;
+  }
+}
+
+/* 減少動態支援 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+html[data-reduced-motion="true"] *,
+html[data-reduced-motion="true"] *::before,
+html[data-reduced-motion="true"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}

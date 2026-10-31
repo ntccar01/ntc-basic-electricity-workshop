@@ -22,6 +22,7 @@ class ElectricityWorkshopApp {
     this.musicTimer = null;
 
     this.state = this.loadState();
+    this.drawerFullscreen = true;
     this.guidedStudy = new GuidedStudyController(this);
   }
 
@@ -258,10 +259,40 @@ class ElectricityWorkshopApp {
       this.openHelpModal();
     });
 
-    // 關閉抽屜與 Modal
+    // 關閉抽屜與 Modal、切換全螢幕／側邊模式
     document.getElementById("btn-close-drawer").addEventListener("click", () => {
       this.closeIslandDrawer();
     });
+
+    const toggleSizeBtn = document.getElementById("btn-toggle-drawer-size");
+    if (toggleSizeBtn) {
+      toggleSizeBtn.addEventListener("click", () => {
+        this.drawerFullscreen = !this.drawerFullscreen;
+        this.syncDrawerSizeUI();
+        this.showToast(this.drawerFullscreen ? "已切換為「全螢幕沉浸學習模式」" : "已切換為「側邊視窗對照模式」");
+      });
+    }
+
+    const moreToolsBtn = document.getElementById("btn-more-tools");
+    const moreToolsMenu = document.getElementById("more-tools-menu");
+    if (moreToolsBtn && moreToolsMenu) {
+      moreToolsBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const isHidden = moreToolsMenu.hidden;
+        moreToolsMenu.hidden = !isHidden;
+        moreToolsBtn.setAttribute("aria-expanded", isHidden ? "true" : "false");
+        moreToolsBtn.textContent = isHidden ? "🧰 更多工具 ▴" : "🧰 更多工具 ▾";
+      });
+      moreToolsMenu.querySelectorAll("button").forEach((b) => {
+        b.addEventListener("click", () => {
+          if (b.id !== "btn-music" && b.id !== "btn-motion") {
+            moreToolsMenu.hidden = true;
+            moreToolsBtn.setAttribute("aria-expanded", "false");
+            moreToolsBtn.textContent = "🧰 更多工具 ▾";
+          }
+        });
+      });
+    }
 
     document.getElementById("btn-close-modal").addEventListener("click", () => {
       this.closeModal();
@@ -408,13 +439,26 @@ class ElectricityWorkshopApp {
     });
 
     drawer.hidden = false;
+    this.syncDrawerSizeUI();
     this.renderDrawerBody();
+  }
+
+  syncDrawerSizeUI() {
+    const drawer = document.getElementById("island-drawer");
+    const toggleBtn = document.getElementById("btn-toggle-drawer-size");
+    if (!drawer) return;
+    drawer.classList.toggle("is-fullscreen", this.drawerFullscreen);
+    document.body.classList.toggle("drawer-fullscreen-active", !drawer.hidden && this.drawerFullscreen);
+    if (toggleBtn) {
+      toggleBtn.textContent = this.drawerFullscreen ? "🗗 側邊看島" : "⛶ 全螢幕學習";
+    }
   }
 
   closeIslandDrawer() {
     const drawer = document.getElementById("island-drawer");
     drawer.hidden = true;
     this.currentIslandId = null;
+    document.body.classList.remove("drawer-fullscreen-active");
   }
 
   renderDrawerBody() {

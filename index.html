@@ -97,40 +97,47 @@
     </div>
   </section>
 
-  <!-- 側邊／底部課程內容抽屜面板 -->
-  <aside id="island-drawer" class="drawer-panel" hidden aria-label="島嶼課程內容面板">
+  <!-- 沉浸式全螢幕／側邊雙模式課程內容面板 -->
+  <aside id="island-drawer" class="drawer-panel is-fullscreen" hidden aria-label="島嶼課程內容面板">
     <div class="drawer-header">
       <div class="drawer-title-group">
-        <div class="drawer-badges" id="drawer-badges"></div>
         <h2 id="drawer-title">島嶼名稱</h2>
+        <div class="drawer-badges" id="drawer-badges"></div>
       </div>
-      <button type="button" class="btn" id="btn-close-drawer" aria-label="關閉面板 (Esc)">✕ 關閉</button>
+      <div class="drawer-tabs" id="drawer-tabs" role="tablist"></div>
+      <div class="drawer-actions">
+        <button type="button" class="btn" id="btn-toggle-drawer-size" title="切換全螢幕學習或側邊視窗">🗗 側邊看島</button>
+        <button type="button" class="btn btn-primary" id="btn-close-drawer" aria-label="返回 3D 群島 (Esc)">🌏 返回群島</button>
+      </div>
     </div>
-    <div class="drawer-tabs" id="drawer-tabs" role="tablist"></div>
     <div class="drawer-body" id="drawer-body"></div>
   </aside>
 
-  <!-- 底部功能工具列（手機與桌機大按鈕設計） -->
+  <!-- 底部功能工具列（單排精簡設計＋更多工具收納選單） -->
   <nav id="bottom-bar" aria-label="主要學習與互動工具列">
-    <div class="dock-inner">
-      <div class="search-box" role="search">
-        <input type="search" id="search-input" placeholder="搜尋島嶼／公式／概念…" aria-label="搜尋島嶼與電學內容" />
-        <button type="button" class="btn btn-primary" id="btn-search" aria-label="執行搜尋">🔍 搜尋</button>
-      </div>
-
-      <button type="button" class="btn" id="btn-list">📋 地點清單</button>
+    <div id="more-tools-menu" class="more-tools-popover" hidden role="menu" aria-label="更多學習與環境工具">
       <button type="button" class="btn" id="btn-reset-cam">🌏 回到全景</button>
-      <button type="button" class="btn btn-primary" id="btn-week01">🎯 第 1 週導讀</button>
-      <button type="button" class="btn btn-accent" id="btn-semester-map">🗓️ 18 週地圖</button>
-      <button type="button" class="btn btn-accent" id="btn-center-island">🏛️ 圖書館＆總複習</button>
-      <button type="button" class="btn" id="btn-collection">🃏 收集圖鑑 <span id="collection-badge">0/12</span></button>
-      <button type="button" class="btn" id="btn-guide">👓 泓哥問答</button>
       <button type="button" class="btn" id="btn-certificate">🎓 進度＆證書 <span id="progress-badge">0%</span></button>
       <button type="button" class="btn" id="btn-savecode">💾 接關碼</button>
       <button type="button" class="btn" id="btn-share">📤 分享卡片</button>
       <button type="button" class="btn" id="btn-music" aria-pressed="false">🎵 背景音樂：關</button>
       <button type="button" class="btn" id="btn-motion" aria-pressed="false">🐢 減少動態：關</button>
       <button type="button" class="btn" id="btn-help" aria-label="操作說明">❓ 說明</button>
+    </div>
+
+    <div class="dock-inner">
+      <div class="search-box" role="search">
+        <input type="search" id="search-input" placeholder="搜尋島嶼／公式…" aria-label="搜尋島嶼與電學內容" />
+        <button type="button" class="btn btn-primary" id="btn-search" aria-label="執行搜尋">🔍 搜尋</button>
+      </div>
+
+      <button type="button" class="btn" id="btn-list">📋 地點清單</button>
+      <button type="button" class="btn btn-primary" id="btn-week01">🎯 第 1 週導讀</button>
+      <button type="button" class="btn btn-accent" id="btn-semester-map">🗓️ 18 週地圖</button>
+      <button type="button" class="btn btn-accent" id="btn-center-island">🏛️ 圖書館＆總複習</button>
+      <button type="button" class="btn" id="btn-guide">👓 泓哥問答</button>
+      <button type="button" class="btn" id="btn-collection">🃏 圖鑑 <span id="collection-badge">0/12</span></button>
+      <button type="button" class="btn" id="btn-more-tools" aria-expanded="false">🧰 更多工具 ▾</button>
     </div>
   </nav>
 

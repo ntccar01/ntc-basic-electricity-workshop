@@ -1,4 +1,5 @@
 import { ArchipelagoScene } from "./scene.js";
+import { GuidedStudyController } from "./week01-module.js";
 
 const STORAGE_KEY = "ntc_elec_workshop_state_v1";
 
@@ -21,6 +22,7 @@ class ElectricityWorkshopApp {
     this.musicTimer = null;
 
     this.state = this.loadState();
+    this.guidedStudy = new GuidedStudyController(this);
   }
 
   getDefaultState() {
@@ -302,6 +304,20 @@ class ElectricityWorkshopApp {
       if (this.scene3D) this.scene3D.resetView();
       this.showToast("已回到 3D 群島全景視角");
     });
+    const btnWeek01 = document.getElementById("btn-week01");
+    if (btnWeek01) {
+      btnWeek01.addEventListener("click", () => {
+        if (this.scene3D) this.scene3D.flyToIsland("island-03");
+        this.openIslandDrawer("island-03", "guidedStudy");
+      });
+    }
+    const btnSemesterMap = document.getElementById("btn-semester-map");
+    if (btnSemesterMap) {
+      btnSemesterMap.addEventListener("click", () => {
+        if (this.scene3D) this.scene3D.flyToIsland(this.content.centerIsland.id);
+        this.openIslandDrawer(this.content.centerIsland.id, "semesterMap");
+      });
+    }
     document.getElementById("btn-center-island").addEventListener("click", () => {
       if (this.scene3D) this.scene3D.flyToIsland(this.content.centerIsland.id);
       this.openIslandDrawer(this.content.centerIsland.id);
@@ -338,7 +354,7 @@ class ElectricityWorkshopApp {
     setInterval(update, 15000);
   }
 
-  // ==================== 島嶼面板（課程群島三分頁 & 中央島總複習／圖書館） ====================
+  // ==================== 島嶼面板（課程群島五分頁 & 中央島 18 週地圖／總複習／圖書館） ====================
   openIslandDrawer(islandId, initialTab = null) {
     this.closeModal();
     this.currentIslandId = islandId;
@@ -359,6 +375,7 @@ class ElectricityWorkshopApp {
       titleEl.textContent = c.name;
       this.currentTab = initialTab || "library";
       tabsEl.innerHTML = `
+        <button type="button" class="tab-btn ${this.currentTab === "semesterMap" ? "active" : ""}" data-tab="semesterMap">🗓️ 18 週學期地圖</button>
         <button type="button" class="tab-btn ${this.currentTab === "library" ? "active" : ""}" data-tab="library">🏛️ 電學知識圖書館</button>
         <button type="button" class="tab-btn ${this.currentTab === "finalQuiz" ? "active" : ""}" data-tab="finalQuiz">🏆 跨課總複習測驗</button>
         <button type="button" class="tab-btn ${this.currentTab === "overview" ? "active" : ""}" data-tab="overview">📊 全部課程進度</button>
@@ -375,8 +392,10 @@ class ElectricityWorkshopApp {
       this.currentTab = initialTab || "textbook";
       tabsEl.innerHTML = `
         <button type="button" class="tab-btn ${this.currentTab === "textbook" ? "active" : ""}" data-tab="textbook">📖 教材重點</button>
+        <button type="button" class="tab-btn ${this.currentTab === "guidedStudy" ? "active" : ""}" data-tab="guidedStudy">🎯 課本導讀闖關</button>
         <button type="button" class="tab-btn ${this.currentTab === "worksheet" ? "active" : ""}" data-tab="worksheet">📝 學習單</button>
         <button type="button" class="tab-btn ${this.currentTab === "quiz" ? "active" : ""}" data-tab="quiz">✍️ 隨堂測驗</button>
+        <button type="button" class="tab-btn ${this.currentTab === "teacherMode" ? "active" : ""}" data-tab="teacherMode">👨‍🏫 教師引導</button>
       `;
     }
 
@@ -403,7 +422,9 @@ class ElectricityWorkshopApp {
     bodyEl.scrollTop = 0;
 
     if (this.currentIslandId === this.content.centerIsland.id) {
-      if (this.currentTab === "library") {
+      if (this.currentTab === "semesterMap") {
+        this.guidedStudy.renderSemesterMap(bodyEl);
+      } else if (this.currentTab === "library") {
         this.renderCenterLibraryTab(bodyEl);
       } else if (this.currentTab === "finalQuiz") {
         this.renderCenterFinalQuizTab(bodyEl);
@@ -418,6 +439,10 @@ class ElectricityWorkshopApp {
 
     if (this.currentTab === "textbook") {
       this.renderIslandTextbookTab(bodyEl, isl);
+    } else if (this.currentTab === "guidedStudy") {
+      this.guidedStudy.renderStudentGuidedTab(bodyEl, isl.id);
+    } else if (this.currentTab === "teacherMode") {
+      this.guidedStudy.renderTeacherGuidedTab(bodyEl, isl.id);
     } else if (this.currentTab === "worksheet") {
       this.renderIslandWorksheetTab(bodyEl, isl);
     } else {
@@ -500,6 +525,7 @@ class ElectricityWorkshopApp {
           <button type="button" class="btn ${isRead ? "" : "btn-primary"}" id="btn-mark-read">
             ${isRead ? "✓ 已標記讀完" : "✅ 標記本課教材已讀"}
           </button>
+          <button type="button" class="btn btn-primary" id="btn-go-guided">🎯 進入課本導讀＆SVG闖關 →</button>
           <button type="button" class="btn btn-accent" id="btn-go-worksheet">前往填寫學習單 →</button>
         </div>
       </div>
@@ -510,6 +536,12 @@ class ElectricityWorkshopApp {
       this.saveState();
       this.renderDrawerBody();
       this.showToast(`已完成「${isl.name}」教材閱讀！`);
+    });
+
+    bodyEl.querySelector("#btn-go-guided").addEventListener("click", () => {
+      this.state.readCompleted[isl.id] = true;
+      this.saveState();
+      this.openIslandDrawer(isl.id, "guidedStudy");
     });
 
     bodyEl.querySelector("#btn-go-worksheet").addEventListener("click", () => {
@@ -1030,6 +1062,9 @@ class ElectricityWorkshopApp {
     this.state.reducedMotion = keepMotion;
     this.quizSession = {};
     this.finalExamQuestions = [];
+    if (this.guidedStudy) {
+      this.guidedStudy.resetAllStore();
+    }
     this.saveState();
     this.showToast("已清除並重置所有課程學習進度！");
   }
@@ -1561,7 +1596,8 @@ class ElectricityWorkshopApp {
       q: this.state.quizScores,
       f: this.state.finalExamScore,
       c: this.state.collectedCards,
-      w: this.state.worksheets
+      w: this.state.worksheets,
+      g: this.guidedStudy ? this.guidedStudy.store : {}
     };
     const jsonStr = JSON.stringify(payload);
     const b64 = btoa(encodeURIComponent(jsonStr));
@@ -1629,6 +1665,10 @@ class ElectricityWorkshopApp {
         this.state.finalExamScore = data.f || null;
         this.state.collectedCards = Array.isArray(data.c) ? data.c : ["card-01"];
         this.state.worksheets = data.w || {};
+        if (this.guidedStudy && data.g && typeof data.g === "object") {
+          this.guidedStudy.store = data.g;
+          this.guidedStudy.saveStore();
+        }
         this.saveState();
         fb.style.color = "var(--success)";
         fb.textContent = "✅ 接關碼還原成功！所有課程進度與圖鑑皆已同步更新。";

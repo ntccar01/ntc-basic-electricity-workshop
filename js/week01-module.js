@@ -505,7 +505,7 @@ function buildVisuals() {
     var bypass =
       state === "short"
         ? '<path d="M 346 82 L 346 222 L 506 222" fill="none" stroke="#dc2626" stroke-width="9" stroke-linejoin="round"/>' +
-          txt(366, 169, "⚡ 危險近路", 20, "#b91c1c", 800)
+          txt(412, 162, "⚡ 危險近路", 18, "#b91c1c", 800, 'text-anchor="middle"')
         : "";
     var route =
       state === "closed"
@@ -1853,11 +1853,11 @@ export class GuidedStudyController {
         '<line x1="252" y1="56" x2="334" y2="56" stroke="#16a34a" stroke-width="5" stroke-linecap="round" marker-end="url(#sim-arrow)"/>'
       : "";
 
-    // 短路危險紅色近路
+    // 短路危險紅色近路（紅線 x=223 與開關框 x=216 分離；標籤框 x=231..339 與右側燈泡圓框左緣 x=346 保持清晰安全間距）
     const bypass = isShort
-      ? '<path d="M 225 56 L 225 209 L 377 209" fill="none" stroke="#dc2626" stroke-width="9" stroke-linejoin="round"/>' +
-        '<rect x="234" y="168" width="128" height="28" rx="6" fill="#dc2626"/>' +
-        '<text x="298" y="188" fill="#ffffff" font-size="16" font-weight="800" text-anchor="middle">⚡ 危險短路近路</text>'
+      ? '<path d="M 223 56 L 223 206 L 377 206" fill="none" stroke="#dc2626" stroke-width="8" stroke-linejoin="round"/>' +
+        '<rect x="231" y="128" width="108" height="28" rx="6" fill="#dc2626"/>' +
+        '<text x="285" y="147" fill="#ffffff" font-size="13.5" font-weight="800" text-anchor="middle">⚡ 危險短路近路</text>'
       : "";
 
     // 負載發光光暈

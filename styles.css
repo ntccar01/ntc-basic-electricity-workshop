@@ -157,10 +157,18 @@ html[data-theme="dusk"] .btn-accent {
 }
 
 .btn-active,
-.btn[aria-pressed="true"] {
+.btn:not(.btn-primary):not(.btn-accent)[aria-pressed="true"] {
   border-color: var(--primary);
   box-shadow: 0 0 0 2px var(--primary);
   background: var(--surface-alt);
+  color: var(--ink);
+}
+
+.btn-primary[aria-pressed="true"] {
+  background: var(--primary);
+  color: var(--primary-ink);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--accent);
 }
 
 /* 3D 畫布與主舞台 */

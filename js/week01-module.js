@@ -473,11 +473,19 @@ function buildVisuals() {
     return circle(x, y, 19, color, color, 1) + txt(x, y + 6, label, 17, "#ffffff", 800, 'text-anchor="middle"');
   }
   function circuit(state, key) {
-    var wireColor = "#24627b";
-    var switchColor = "#c95832";
+    var wireColor = "#475569"; // 導線：深鐵灰
+    var sourceColor = "#1565c0"; // 電源：寶石藍
+    var switchColor = "#ea580c"; // 開關：鮮明亮橘
+    var loadColor = state === "closed" ? "#d97706" : "#7c3aed"; // 負載：發亮金珀色 / 未通電紫羅蘭色
+    var switchBox =
+      '<rect x="234" y="46" width="82" height="52" rx="10" fill="#fff7ed" stroke="#fb923c" stroke-width="2" stroke-dasharray="5 3"/>';
     var top = line(132, 82, 250, 82, wireColor, 6) + line(300, 82, 506, 82, wireColor, 6);
-    var contacts = circle(250, 82, 5, "#fff5ed", switchColor, 3) + circle(300, 82, 5, "#fff5ed", switchColor, 3);
-    var switchBlade = state === "open" ? line(250, 82, 293, 60, switchColor, 6) : line(250, 82, 300, 82, switchColor, 6);
+    var contacts =
+      circle(250, 82, 6.5, "#ffffff", switchColor, 3.5) + circle(300, 82, 6.5, "#ffffff", switchColor, 3.5);
+    var switchBlade =
+      state === "open"
+        ? line(250, 82, 293, 55, switchColor, 7)
+        : line(250, 82, 300, 82, switchColor, 8);
     var wires =
       top +
       line(506, 82, 506, 126, wireColor, 6) +
@@ -485,21 +493,34 @@ function buildVisuals() {
       line(506, 222, 132, 222, wireColor, 6) +
       line(132, 222, 132, 176, wireColor, 6) +
       line(132, 126, 132, 82, wireColor, 6);
-    var battery = circle(132, 151, 26, "#e5f3f6", wireColor, 4) + txt(132, 158, "+ −", 20, "#164f6a", 800, 'text-anchor="middle"');
-    var lampFill = state === "closed" ? "#fff0b5" : "#ecf1f2";
+    var battery =
+      circle(132, 151, 26, "#dbeafe", sourceColor, 4.5) +
+      txt(132, 158, "+ −", 20, "#1e3a8a", 800, 'text-anchor="middle"');
+    var lampFill = state === "closed" ? "#fef08a" : "#f3e8ff";
+    var lampGlow = state === "closed" ? '<circle cx="506" cy="151" r="34" fill="#fde047" fill-opacity="0.35"/>' : "";
     var lamp =
-      circle(506, 151, 25, lampFill, state === "closed" ? "#e59631" : "#8ba3ad", 5) +
-      txt(506, 160, "✦", 30, state === "closed" ? "#dc8122" : "#8ba3ad", 800, 'text-anchor="middle"');
+      lampGlow +
+      circle(506, 151, 25, lampFill, loadColor, 5) +
+      txt(506, 160, "✦", 30, loadColor, 800, 'text-anchor="middle"');
     var bypass =
       state === "short"
-        ? '<path d="M 346 82 L 346 222 L 506 222" fill="none" stroke="#d3403b" stroke-width="9" stroke-linejoin="round"/>' +
-          txt(366, 169, "危險近路", 20, "#b3322d", 800)
+        ? '<path d="M 346 82 L 346 222 L 506 222" fill="none" stroke="#dc2626" stroke-width="9" stroke-linejoin="round"/>' +
+          txt(366, 169, "⚡ 危險近路", 20, "#b91c1c", 800)
         : "";
-    var route = state === "closed" ? line(353, 82, 423, 82, "#279478", 5, 'marker-end="url(#arrow-' + key + ')"') : "";
-    var stateText = state === "closed" ? "路徑完整，經過負載" : state === "open" ? "開關處中斷，走不成一圈" : "紅色近路繞過負載";
-    var switchCallout = line(275, 88, 275, 105, switchColor, 2) + txt(275, 128, "開關", 18, switchColor, 800, 'text-anchor="middle"');
-    var wireCallout = line(340, 247, 340, 222, wireColor, 2) + txt(340, 272, "導線", 18, wireColor, 800, 'text-anchor="middle"');
+    var route = state === "closed" ? line(353, 82, 423, 82, "#16a34a", 5, 'marker-end="url(#arrow-' + key + ')"') : "";
+    var stateText =
+      state === "closed"
+        ? "路徑完整，經過負載"
+        : state === "open"
+        ? "開關處中斷，走不成一圈"
+        : "紅色近路繞過負載";
+    var switchCallout =
+      line(275, 98, 275, 112, switchColor, 2.5) +
+      txt(275, 132, state === "open" ? "開關(斷開)" : "開關(接通)", 17, "#c2410c", 800, 'text-anchor="middle"');
+    var wireCallout =
+      line(340, 247, 340, 222, wireColor, 2.5) + txt(340, 272, "導線", 18, wireColor, 800, 'text-anchor="middle"');
     return (
+      switchBox +
       wires +
       switchBlade +
       contacts +
@@ -507,11 +528,11 @@ function buildVisuals() {
       lamp +
       bypass +
       route +
-      txt(132, 272, "電源", 18, "#355a70", 700, 'text-anchor="middle"') +
+      txt(132, 272, "電源", 18, sourceColor, 800, 'text-anchor="middle"') +
       switchCallout +
       wireCallout +
-      txt(506, 272, "負載", 18, "#355a70", 700, 'text-anchor="middle"') +
-      txt(340, 40, stateText, 22, state === "short" ? "#b3322d" : "#174d65", 800, 'text-anchor="middle"')
+      txt(506, 272, "負載", 18, loadColor, 800, 'text-anchor="middle"') +
+      txt(340, 36, stateText, 22, state === "short" ? "#b91c1c" : "#174d65", 800, 'text-anchor="middle"')
     );
   }
 
@@ -573,27 +594,29 @@ function buildVisuals() {
   visuals.diagram = wrap(
     "diagram",
     "實物圖與電路圖",
-    "畫法不同，電源、開關、燈泡仍可一一對應。",
+    "畫法不同，電源（藍）、開關（橘）、負載（紫／金黃）仍可一一對應。",
     txt(170, 45, "實物示意", 23, "#174d65", 800, 'text-anchor="middle"') +
-      txt(510, 45, "電路符號", 23, "#174d65", 800, 'text-anchor="middle"') +
-      rect(60, 88, 82, 70, "#dcecf0", "#6797a9", 10) +
-      txt(101, 131, "電池", 17, "#174d65", 800, 'text-anchor="middle"') +
-      rect(170, 88, 82, 70, "#dcecf0", "#6797a9", 10) +
-      txt(211, 131, "開關", 17, "#174d65", 800, 'text-anchor="middle"') +
-      rect(280, 88, 82, 70, "#ffefc9", "#d7a455", 10) +
-      txt(321, 131, "燈泡", 17, "#8e581d", 800, 'text-anchor="middle"') +
-      line(390, 124, 445, 124, "#279478", 5, 'marker-end="url(#arrow-diagram)"') +
-      line(462, 130, 483, 130) +
-      line(462, 111, 462, 149) +
-      line(483, 118, 483, 142) +
-      line(503, 130, 519, 130) +
-      line(519, 130, 536, 113) +
-      circle(574, 130, 23, "#fff5d7", "#c28b37", 4) +
-      txt(574, 139, "✦", 25, "#c28b37", 800, 'text-anchor="middle"') +
-      txt(473, 203, "電源", 16, "#456172", 700, 'text-anchor="middle"') +
-      txt(526, 203, "開關", 16, "#456172", 700, 'text-anchor="middle"') +
-      txt(574, 203, "負載", 16, "#456172", 700, 'text-anchor="middle"') +
-      txt(340, 265, "先找相同元件，再沿導線追蹤連接。", 19, "#456172", 700, 'text-anchor="middle"')
+      txt(510, 45, "電路符號（分色對應）", 23, "#174d65", 800, 'text-anchor="middle"') +
+      rect(60, 88, 82, 70, "#dbeafe", "#1565c0", 10) +
+      txt(101, 131, "電池", 17, "#1e3a8a", 800, 'text-anchor="middle"') +
+      rect(170, 88, 82, 70, "#ffedd5", "#ea580c", 10) +
+      txt(211, 131, "開關", 17, "#c2410c", 800, 'text-anchor="middle"') +
+      rect(280, 88, 82, 70, "#fef3c7", "#d97706", 10) +
+      txt(321, 131, "燈泡", 17, "#b45309", 800, 'text-anchor="middle"') +
+      line(390, 124, 445, 124, "#16a34a", 5, 'marker-end="url(#arrow-diagram)"') +
+      line(462, 130, 483, 130, "#1565c0", 5) +
+      line(462, 111, 462, 149, "#1565c0", 5) +
+      line(483, 118, 483, 142, "#1565c0", 5) +
+      line(503, 130, 515, 130, "#475569", 5) +
+      line(515, 130, 538, 111, "#ea580c", 6) +
+      circle(515, 130, 5, "#ffffff", "#ea580c", 3) +
+      circle(540, 130, 5, "#ffffff", "#ea580c", 3) +
+      circle(578, 130, 23, "#fef3c7", "#d97706", 4.5) +
+      txt(578, 139, "✦", 25, "#d97706", 800, 'text-anchor="middle"') +
+      txt(473, 203, "電源", 16, "#1565c0", 800, 'text-anchor="middle"') +
+      txt(526, 203, "開關", 16, "#ea580c", 800, 'text-anchor="middle"') +
+      txt(578, 203, "負載", 16, "#d97706", 800, 'text-anchor="middle"') +
+      txt(340, 265, "不同元件以不同顏色標示，沿導線即可清楚追蹤連接。", 19, "#456172", 700, 'text-anchor="middle"')
   );
   visuals.closed = wrap("closed", "通路", "路徑完整，而且電流經過負載再回到電源。", circuit("closed", "closed"));
   visuals.open = wrap("open", "斷路", "開關或元件處中斷，負載無法正常運作。", circuit("open", "open"));
@@ -1795,37 +1818,67 @@ export class GuidedStudyController {
   simMarkup(mode, motor = false) {
     const isClosed = mode === "closed";
     const isShort = mode === "short";
-    const lampColor = isClosed ? "#f5a623" : "#8ba4ad";
-    const loadText = motor ? "小馬達" : "車燈";
+    // 四大元件分色系統：電源(寶石藍 #1565c0)、導線(深鐵灰 #475569)、開關(亮琥珀橘 #ea580c)、負載(運轉亮金黃 #d97706 / 未運作紫羅蘭 #7c3aed)、短路(警示紅 #dc2626)
+    const wireColor = "#475569";
+    const sourceColor = "#1565c0";
+    const switchColor = "#ea580c";
+    const loadColor = isClosed ? "#d97706" : "#7c3aed";
+    const loadFill = isShort ? "#fee2e2" : isClosed ? "#fef08a" : "#f3e8ff";
+    const loadText = motor ? "小馬達（負載）" : "車燈（負載）";
     const loadSign = motor ? "M" : "✦";
-    const topWire =
+
+    // 開關專屬淺橘底框＋雙接點端子＋亮橘色閘刀（導通與斷開皆清晰可辨，絕不與導線混淆）
+    const switchBgBox =
+      '<rect x="114" y="28" width="102" height="50" rx="12" fill="#fff7ed" stroke="#fb923c" stroke-width="2" stroke-dasharray="5 3"/>';
+    const switchBlade =
       isClosed || isShort
-        ? '<line x1="122" y1="54" x2="200" y2="54" stroke="#286981" stroke-width="7"/>'
-        : '<line x1="122" y1="54" x2="167" y2="54" stroke="#286981" stroke-width="7"/><line x1="167" y1="54" x2="195" y2="33" stroke="#286981" stroke-width="7"/>';
-    const bypass = isShort
-      ? '<path d="M 203 54 L 203 209 L 377 209" fill="none" stroke="#d6423c" stroke-width="9"/><text x="219" y="194" fill="#a52f2b" font-size="18" font-weight="700">危險近路</text>'
+        ? `<line x1="130" y1="56" x2="200" y2="56" stroke="${switchColor}" stroke-width="8" stroke-linecap="round"/>`
+        : `<line x1="130" y1="56" x2="192" y2="30" stroke="${switchColor}" stroke-width="8" stroke-linecap="round"/>`;
+    const switchTerminals =
+      `<circle cx="130" cy="56" r="7" fill="#ffffff" stroke="${switchColor}" stroke-width="4"/>` +
+      `<circle cx="200" cy="56" r="7" fill="#ffffff" stroke="${switchColor}" stroke-width="4"/>`;
+    const switchStateLabel = isClosed || isShort ? "開關（接通）" : "開關（斷開）";
+
+    // 通路時的綠色電流方向箭頭
+    const currentArrow = isClosed
+      ? '<defs><marker id="sim-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#16a34a"/></marker></defs>' +
+        '<line x1="250" y1="56" x2="325" y2="56" stroke="#16a34a" stroke-width="5" marker-end="url(#sim-arrow)"/>' +
+        '<text x="288" y="43" font-size="14" fill="#15803d" font-weight="800" text-anchor="middle">電流方向</text>'
       : "";
+
+    // 短路危險紅色近路
+    const bypass = isShort
+      ? '<path d="M 225 56 L 225 209 L 377 209" fill="none" stroke="#dc2626" stroke-width="9" stroke-linejoin="round"/>' +
+        '<rect x="234" y="168" width="128" height="28" rx="6" fill="#dc2626"/>' +
+        '<text x="298" y="188" fill="#ffffff" font-size="16" font-weight="800" text-anchor="middle">⚡ 危險短路近路</text>'
+      : "";
+
+    // 負載發光光暈
+    const loadGlow = isClosed ? '<circle cx="377" cy="149" r="38" fill="#fde047" fill-opacity="0.38"/>' : "";
+
     return (
       '<svg role="img" aria-label="' +
       (isShort ? "短路：紅線繞過負載直接回電源" : isClosed ? "通路：開關接通，電流經過負載" : "斷路：開關打開，路徑中斷") +
-      '" viewBox="0 0 500 260" xmlns="http://www.w3.org/2000/svg">' +
-      '<rect width="500" height="260" rx="14" fill="#f6fafb"/>' +
-      '<path d="M 80 54 L 122 54 M 200 54 L 377 54 L 377 120 M 377 177 L 377 226 L 80 226 L 80 177 M 80 120 L 80 54" fill="none" stroke="#286981" stroke-width="7" stroke-linecap="round"/>' +
-      topWire +
+      '" viewBox="0 0 500 265" xmlns="http://www.w3.org/2000/svg">' +
+      '<rect width="500" height="265" rx="14" fill="#f8fafc"/>' +
+      currentArrow +
+      switchBgBox +
+      // 導線（深鐵灰色 #475569，與開關、電源、負載明確區分）
+      `<path d="M 80 56 L 130 56 M 200 56 L 377 56 L 377 120 M 377 178 L 377 224 L 80 224 L 80 178 M 80 120 L 80 56" fill="none" stroke="${wireColor}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>` +
       bypass +
-      '<circle cx="80" cy="149" r="29" fill="#e7f0f4" stroke="#286981" stroke-width="5"/><text x="63" y="159" font-size="28" fill="#173f59">+ −</text>' +
-      '<circle cx="377" cy="149" r="28" fill="' +
-      (isShort ? "#f7d9d7" : isClosed ? "#fff0c2" : "#e9eef0") +
-      '" stroke="' +
-      lampColor +
-      '" stroke-width="6"/><text x="365" y="159" font-size="29" fill="' +
-      lampColor +
-      '">' +
-      loadSign +
-      "</text>" +
-      '<text x="43" y="252" font-size="18" fill="#315a6e" font-weight="700">電源</text><text x="150" y="29" font-size="18" fill="#315a6e" font-weight="700">開關</text><text x="345" y="252" font-size="18" fill="#315a6e" font-weight="700">' +
-      loadText +
-      "</text></svg>"
+      switchBlade +
+      switchTerminals +
+      // 電源（寶石藍 #1565c0）
+      `<circle cx="80" cy="149" r="29" fill="#dbeafe" stroke="${sourceColor}" stroke-width="5"/><text x="80" y="158" font-size="26" font-weight="800" fill="#1e3a8a" text-anchor="middle">+ −</text>` +
+      // 負載（紫羅蘭 #7c3aed / 通電亮金黃 #d97706）
+      loadGlow +
+      `<circle cx="377" cy="149" r="28" fill="${loadFill}" stroke="${loadColor}" stroke-width="6"/><text x="377" y="159" font-size="28" font-weight="800" fill="${loadColor}" text-anchor="middle">${loadSign}</text>` +
+      // 四大元件分色文字標籤
+      `<text x="80" y="252" font-size="17" fill="${sourceColor}" font-weight="800" text-anchor="middle">電源(電池)</text>` +
+      `<text x="165" y="21" font-size="17" fill="#c2410c" font-weight="800" text-anchor="middle">${switchStateLabel}</text>` +
+      `<text x="230" y="248" font-size="16" fill="${wireColor}" font-weight="800" text-anchor="middle">導線</text>` +
+      `<text x="377" y="252" font-size="17" fill="${loadColor}" font-weight="800" text-anchor="middle">${loadText}</text>` +
+      "</svg>"
     );
   }
 
@@ -1833,6 +1886,16 @@ export class GuidedStudyController {
     const sim = this.node("div", "wk-sim");
     const art = this.node("div", "wk-sim-art");
     art.innerHTML = this.simMarkup(this.ui.sim, motor);
+
+    // 元件分色圖例列（幫助學生一眼辨識不同元件）
+    const legend = this.node("div", "wk-badge-row");
+    legend.style.margin = "8px 0 4px";
+    legend.innerHTML = `
+      <span class="badge" style="background:#dbeafe; color:#1e3a8a; border-color:#1565c0;">🔵 電源（供能）</span>
+      <span class="badge" style="background:#ffedd5; color:#c2410c; border-color:#ea580c;">🟠 開關（控制通斷）</span>
+      <span class="badge" style="background:#f1f5f9; color:#334155; border-color:#475569;">⚫ 導線（連接路徑）</span>
+      <span class="badge" style="background:#fef3c7; color:#b45309; border-color:#d97706;">🟣/🟡 負載（用能做功）</span>
+    `;
 
     const controls = this.node("div", "wk-btn-row");
     [
@@ -1854,12 +1917,12 @@ export class GuidedStudyController {
 
     const msg =
       this.ui.sim === "closed"
-        ? "✅ 通路狀態：路徑完整，電流經過負載使其正常運作。"
+        ? "✅ 通路狀態：橘色開關接通，路徑完整，電流經過負載使其正常運作。"
         : this.ui.sim === "short"
         ? "⚠️ 短路狀態：負載被紅色低阻近路繞過；短路可能造成大電流與過熱！"
-        : "⏸️ 斷路狀態：開關斷開，路徑不完整，電流無法流通。";
+        : "⏸️ 斷路狀態：橘色開關斷開，路徑不完整，電流無法流通。";
 
-    this.append(sim, art, controls, this.node("p", "wk-sim-status", msg));
+    this.append(sim, art, legend, controls, this.node("p", "wk-sim-status", msg));
     if (this.ui.sim === "short") {
       this.append(sim, this.node("p", "wk-warning", "🚨 安全提醒：只看畫面示意，切勿將實體電源兩端直接用導線短接！"));
     }

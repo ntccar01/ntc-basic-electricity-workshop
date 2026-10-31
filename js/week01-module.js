@@ -501,7 +501,7 @@ function buildVisuals() {
     var lamp =
       lampGlow +
       circle(506, 151, 25, lampFill, loadColor, 5) +
-      txt(506, 160, "✦", 30, loadColor, 800, 'text-anchor="middle"');
+      txt(506, 158, "✦", 22, loadColor, 800, 'text-anchor="middle"');
     var bypass =
       state === "short"
         ? '<path d="M 346 82 L 346 222 L 506 222" fill="none" stroke="#dc2626" stroke-width="9" stroke-linejoin="round"/>' +
@@ -519,10 +519,10 @@ function buildVisuals() {
         ? "開關處中斷，走不成一圈"
         : "紅色近路繞過負載";
     var switchCallout =
-      line(275, 98, 275, 112, switchColor, 2.5) +
-      txt(275, 132, state === "open" ? "開關(斷開)" : "開關(接通)", 17, "#c2410c", 800, 'text-anchor="middle"');
+      line(275, 98, 275, 110, switchColor, 2.5) +
+      txt(275, 136, state === "open" ? "開關(斷開)" : "開關(接通)", 17, "#c2410c", 800, 'text-anchor="middle"');
     var wireCallout =
-      line(340, 247, 340, 222, wireColor, 2.5) + txt(340, 272, "導線", 18, wireColor, 800, 'text-anchor="middle"');
+      line(340, 245, 340, 222, wireColor, 2.5) + txt(340, 272, "導線", 18, wireColor, 800, 'text-anchor="middle"');
     return (
       switchBox +
       wires +
@@ -545,26 +545,28 @@ function buildVisuals() {
   visuals.switchwire = wrap(
     "switchwire",
     "開關與導線",
-    "橘色表示開關接片，藍色表示導線。開關控制通斷，導線負責連接。",
-    txt(170, 48, "開關斷開", 23, "#a54a2a", 800, 'text-anchor="middle"') +
-      txt(510, 48, "開關接通", 23, "#177250", 800, 'text-anchor="middle"') +
-      line(46, 135, 145, 135) +
-      line(192, 135, 290, 135) +
-      line(145, 135, 187, 108, "#c95832", 6) +
-      circle(145, 135, 5, "#fff5ed", "#c95832", 3) +
-      circle(192, 135, 5, "#fff5ed", "#c95832", 3) +
-      line(390, 135, 470, 135) +
-      line(530, 135, 630, 135) +
-      line(470, 135, 530, 135, "#c95832", 6) +
-      circle(470, 135, 5, "#fff5ed", "#c95832", 3) +
-      circle(530, 135, 5, "#fff5ed", "#c95832", 3) +
-      line(340, 120, 290, 135, "#24627b", 2) +
-      txt(340, 117, "導線", 18, "#24627b", 800, 'text-anchor="middle"') +
-      badge(70, 211, "1", "#a54a2a") +
+    "橘色表示開關接片，深灰色表示導線。開關控制通斷，導線負責連接。",
+    txt(170, 48, "開關斷開", 23, "#c2410c", 800, 'text-anchor="middle"') +
+      txt(510, 48, "開關接通", 23, "#15803d", 800, 'text-anchor="middle"') +
+      '<rect x="128" y="96" width="82" height="58" rx="10" fill="#fff7ed" stroke="#fb923c" stroke-width="2" stroke-dasharray="5 3"/>' +
+      '<rect x="454" y="96" width="92" height="58" rx="10" fill="#fff7ed" stroke="#fb923c" stroke-width="2" stroke-dasharray="5 3"/>' +
+      line(46, 135, 145, 135, "#475569", 6) +
+      line(192, 135, 290, 135, "#475569", 6) +
+      line(145, 135, 187, 108, "#ea580c", 7) +
+      circle(145, 135, 6, "#ffffff", "#ea580c", 3.5) +
+      circle(192, 135, 6, "#ffffff", "#ea580c", 3.5) +
+      line(390, 135, 470, 135, "#475569", 6) +
+      line(530, 135, 630, 135, "#475569", 6) +
+      line(470, 135, 530, 135, "#ea580c", 7) +
+      circle(470, 135, 6, "#ffffff", "#ea580c", 3.5) +
+      circle(530, 135, 6, "#ffffff", "#ea580c", 3.5) +
+      line(340, 118, 298, 131, "#475569", 2.5) +
+      txt(340, 106, "導線", 18, "#475569", 800, 'text-anchor="middle"') +
+      badge(70, 211, "1", "#c2410c") +
       txt(98, 218, "線路中斷", 20, "#69432f") +
-      badge(410, 211, "2", "#188563") +
+      badge(410, 211, "2", "#15803d") +
       txt(438, 218, "線路連接", 20, "#225d52") +
-      txt(340, 273, "橘色接片是開關；藍色連接線是導線。", 19, "#456172", 700, 'text-anchor="middle"')
+      txt(340, 273, "橘色接片是開關；深灰色連接線是導線。", 19, "#456172", 700, 'text-anchor="middle"')
   );
   visuals["source-load"] = wrap(
     "source-load",
@@ -1833,11 +1835,11 @@ export class GuidedStudyController {
 
     // 開關專屬淺橘底框＋雙接點端子＋亮橘色閘刀（導通與斷開皆清晰可辨，絕不與導線混淆）
     const switchBgBox =
-      '<rect x="114" y="28" width="102" height="50" rx="12" fill="#fff7ed" stroke="#fb923c" stroke-width="2" stroke-dasharray="5 3"/>';
+      '<rect x="114" y="30" width="102" height="48" rx="12" fill="#fff7ed" stroke="#fb923c" stroke-width="2" stroke-dasharray="5 3"/>';
     const switchBlade =
       isClosed || isShort
         ? `<line x1="130" y1="56" x2="200" y2="56" stroke="${switchColor}" stroke-width="8" stroke-linecap="round"/>`
-        : `<line x1="130" y1="56" x2="192" y2="30" stroke="${switchColor}" stroke-width="8" stroke-linecap="round"/>`;
+        : `<line x1="130" y1="56" x2="192" y2="37" stroke="${switchColor}" stroke-width="8" stroke-linecap="round"/>`;
     const switchTerminals =
       `<circle cx="130" cy="56" r="7" fill="#ffffff" stroke="${switchColor}" stroke-width="4"/>` +
       `<circle cx="200" cy="56" r="7" fill="#ffffff" stroke="${switchColor}" stroke-width="4"/>`;

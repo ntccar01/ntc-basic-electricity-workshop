@@ -463,7 +463,7 @@ function buildVisuals() {
         "</title>" +
         '<defs><marker id="arrow-' +
         key +
-        '" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#279478"/></marker></defs>' +
+        '" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="14" refX="13" refY="7" orient="auto"><path d="M 0 0 L 16 7 L 0 14 z" fill="#16a34a"/></marker></defs>' +
         rect(1, 1, 678, 298, "#f8fbfc", "#d8e8ed", 18) +
         body +
         "</svg>"
@@ -507,7 +507,11 @@ function buildVisuals() {
         ? '<path d="M 346 82 L 346 222 L 506 222" fill="none" stroke="#dc2626" stroke-width="9" stroke-linejoin="round"/>' +
           txt(366, 169, "⚡ 危險近路", 20, "#b91c1c", 800)
         : "";
-    var route = state === "closed" ? line(353, 82, 423, 82, "#16a34a", 5, 'marker-end="url(#arrow-' + key + ')"') : "";
+    var route =
+      state === "closed"
+        ? line(350, 82, 430, 82, "#16a34a", 5, 'marker-end="url(#arrow-' + key + ')"') +
+          txt(390, 62, "電流方向", 15, "#15803d", 800, 'text-anchor="middle"')
+        : "";
     var stateText =
       state === "closed"
         ? "路徑完整，經過負載"
@@ -1839,11 +1843,12 @@ export class GuidedStudyController {
       `<circle cx="200" cy="56" r="7" fill="#ffffff" stroke="${switchColor}" stroke-width="4"/>`;
     const switchStateLabel = isClosed || isShort ? "開關（接通）" : "開關（斷開）";
 
-    // 通路時的綠色電流方向箭頭
+    // 通路時的綠色電流方向箭頭（使用 markerUnits="userSpaceOnUse" 固定尺寸，避免箭頭放大與文字重疊）
     const currentArrow = isClosed
-      ? '<defs><marker id="sim-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#16a34a"/></marker></defs>' +
-        '<line x1="250" y1="56" x2="325" y2="56" stroke="#16a34a" stroke-width="5" marker-end="url(#sim-arrow)"/>' +
-        '<text x="288" y="43" font-size="14" fill="#15803d" font-weight="800" text-anchor="middle">電流方向</text>'
+      ? '<defs><marker id="sim-arrow" markerUnits="userSpaceOnUse" markerWidth="18" markerHeight="16" refX="14" refY="8" orient="auto"><path d="M 0 0 L 18 8 L 0 16 z" fill="#16a34a"/></marker></defs>' +
+        '<rect x="250" y="12" width="88" height="25" rx="12.5" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>' +
+        '<text x="294" y="29" font-size="14" fill="#15803d" font-weight="800" text-anchor="middle">電流方向</text>' +
+        '<line x1="252" y1="56" x2="334" y2="56" stroke="#16a34a" stroke-width="5" stroke-linecap="round" marker-end="url(#sim-arrow)"/>'
       : "";
 
     // 短路危險紅色近路
@@ -1861,10 +1866,10 @@ export class GuidedStudyController {
       (isShort ? "短路：紅線繞過負載直接回電源" : isClosed ? "通路：開關接通，電流經過負載" : "斷路：開關打開，路徑中斷") +
       '" viewBox="0 0 500 265" xmlns="http://www.w3.org/2000/svg">' +
       '<rect width="500" height="265" rx="14" fill="#f8fafc"/>' +
-      currentArrow +
       switchBgBox +
       // 導線（深鐵灰色 #475569，與開關、電源、負載明確區分）
       `<path d="M 80 56 L 130 56 M 200 56 L 377 56 L 377 120 M 377 178 L 377 224 L 80 224 L 80 178 M 80 120 L 80 56" fill="none" stroke="${wireColor}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>` +
+      currentArrow +
       bypass +
       switchBlade +
       switchTerminals +

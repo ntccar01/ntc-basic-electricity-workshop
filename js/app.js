@@ -1,5 +1,6 @@
 import { ArchipelagoScene } from "./scene.js";
 import { GuidedStudyController } from "./week01-module.js";
+import { CloudLearningTracker } from "./cloud-tracker.js";
 
 const STORAGE_KEY = "ntc_elec_workshop_state_v1";
 
@@ -24,6 +25,7 @@ class ElectricityWorkshopApp {
     this.state = this.loadState();
     this.drawerFullscreen = true;
     this.guidedStudy = new GuidedStudyController(this);
+    this.cloudTracker = new CloudLearningTracker(this);
   }
 
   getDefaultState() {
@@ -81,6 +83,9 @@ class ElectricityWorkshopApp {
       this.scene3D.refreshLabelStatuses();
     }
     this.renderFallbackList();
+    if (this.cloudTracker) {
+      this.cloudTracker.syncStudentProgress();
+    }
   }
 
   async init() {
@@ -253,6 +258,22 @@ class ElectricityWorkshopApp {
     document.getElementById("btn-daily-key").addEventListener("click", () => {
       this.useDailyKeyToOpenChest();
     });
+
+    // 學生登入與雲端學習歷程同步
+    document.getElementById("btn-student-login")?.addEventListener("click", () => {
+      if (this.cloudTracker) {
+        this.cloudTracker.openStudentLoginModal();
+      }
+    });
+
+    // 教師戰情室快速入口
+    document.getElementById("btn-teacher-warroom")?.addEventListener("click", () => {
+      if (this.scene3D) this.scene3D.flyToIsland("island-03");
+      this.openIslandDrawer("island-03", "teacherMode");
+    });
+    if (this.cloudTracker) {
+      this.cloudTracker.updateTopBarLoginButton();
+    }
 
     // 吉祥物泓哥問候
     document.getElementById("btn-mascot-greet").addEventListener("click", () => {

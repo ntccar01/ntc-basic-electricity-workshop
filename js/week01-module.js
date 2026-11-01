@@ -1063,6 +1063,42 @@ export class GuidedStudyController {
     );
     wrap.appendChild(hero);
 
+    // 學生學習歷程身分狀態橫幅
+    if (this.app && this.app.cloudTracker) {
+      const tracker = this.app.cloudTracker;
+      const idBar = this.node("div", "wk-student-id-bar");
+      if (tracker.profile) {
+        const syncIcon = tracker.isCloudConnected ? "☁️ Firebase 雲端即時同步中" : "💾 本機＋戰情室自動記錄中";
+        idBar.innerHTML = `
+          <div>
+            <strong>👤 學習歷程記錄身分：</strong>
+            <span class="badge badge-concept">${tracker.profile.className} ${tracker.profile.seatNo}號 ${tracker.profile.studentName}</span>
+            <small class="wk-muted" style="margin-left:6px;">（${syncIcon}）</small>
+          </div>
+        `;
+        const editBtn = this.btn(
+          "🔄 檢視歷程／切換學生",
+          () => tracker.openStudentLoginModal(),
+          "btn"
+        );
+        idBar.appendChild(editBtn);
+      } else {
+        idBar.innerHTML = `
+          <div>
+            <strong>📢 尚未登入班級與座號：</strong>
+            <span>請先點選右側按鈕輸入<strong>班級、座號、姓名</strong>，系統就會自動把你的作答進度同步到老師的後台！</span>
+          </div>
+        `;
+        const loginBtn = this.btn(
+          "👤 立即登入班級座號（3 秒完成）",
+          () => tracker.openStudentLoginModal(),
+          "btn btn-primary"
+        );
+        idBar.appendChild(loginBtn);
+      }
+      wrap.appendChild(idBar);
+    }
+
     // 節次切換與教師模式快捷鈕
     const tabBar = this.node("div", "wk-lesson-tabs");
     [1, 2].forEach((n) => {
@@ -2247,6 +2283,11 @@ export class GuidedStudyController {
 
     if (islandId !== "island-03" && !this.ui.previewWeek01OnOtherIsland) {
       this.renderPlannedIslandOverview(wrap, islandId, "teacher");
+      if (this.app && this.app.cloudTracker) {
+        const warRoomMount = this.node("div", "wk-war-room-mount");
+        this.app.cloudTracker.renderTeacherWarRoom(warRoomMount);
+        wrap.appendChild(warRoomMount);
+      }
       container.appendChild(wrap);
       return;
     }
@@ -2305,6 +2346,13 @@ export class GuidedStudyController {
       )
     );
     wrap.appendChild(tabBar);
+
+    // 📡 全班學習歷程即時戰情室（Firebase 雲端教師後台）
+    if (this.app && this.app.cloudTracker) {
+      const warRoomMount = this.node("div", "wk-war-room-mount");
+      this.app.cloudTracker.renderTeacherWarRoom(warRoomMount);
+      wrap.appendChild(warRoomMount);
+    }
 
     // 課堂節奏
     const pace = this.node("div", "section-card");

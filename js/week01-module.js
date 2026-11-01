@@ -1069,10 +1069,11 @@ export class GuidedStudyController {
       const idBar = this.node("div", "wk-student-id-bar");
       if (tracker.profile) {
         const syncIcon = tracker.isCloudConnected ? "☁️ Firebase 雲端即時同步中" : "💾 本機＋戰情室自動記錄中";
+        const yr = tracker.profile.schoolYear || "115學年度";
         idBar.innerHTML = `
           <div>
             <strong>👤 學習歷程記錄身分：</strong>
-            <span class="badge badge-concept">${tracker.profile.className} ${tracker.profile.seatNo}號 ${tracker.profile.studentName}</span>
+            <span class="badge badge-concept">${yr} · ${tracker.profile.className} ${tracker.profile.seatNo}號 ${tracker.profile.studentName}</span>
             <small class="wk-muted" style="margin-left:6px;">（${syncIcon}）</small>
           </div>
         `;

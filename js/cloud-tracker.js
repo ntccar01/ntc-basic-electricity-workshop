@@ -2,7 +2,13 @@
 // 基本電學練工坊｜學生學習歷程雙軌同步（LocalStorage + Firebase Firestore）與教師即時戰情室
 // ============================================================================
 
-import { DEFAULT_FIREBASE_CONFIG, DEFAULT_CLASSES, DEFAULT_TEACHER_PIN } from "./firebase-config.js";
+import {
+  DEFAULT_FIREBASE_CONFIG,
+  CURRENT_SCHOOL_YEAR,
+  DEFAULT_SCHOOL_YEARS,
+  DEFAULT_CLASSES,
+  DEFAULT_TEACHER_PIN
+} from "./firebase-config.js";
 import { WEEK01 } from "./week01-module.js";
 
 const STUDENT_PROFILE_KEY = "ntc_elec_student_profile_v1";
@@ -22,6 +28,7 @@ export class CloudLearningTracker {
     this.syncStatus = "idle"; // "idle" | "syncing" | "synced" | "local-only" | "error"
     this.lastSyncedAt = null;
     this.unsubscribeSnapshot = null;
+    this.selectedYearFilter = this.profile?.schoolYear || CURRENT_SCHOOL_YEAR;
     this.selectedClassFilter = this.profile?.className || DEFAULT_CLASSES[0];
     this.sortBy = "seat"; // "seat" | "status" | "progress"
     this.teacherUnlocked = sessionStorage.getItem(TEACHER_UNLOCK_KEY) === "1";
@@ -52,13 +59,20 @@ export class CloudLearningTracker {
       const raw = localStorage.getItem(STUDENT_PROFILE_KEY);
       if (!raw) return null;
       const p = JSON.parse(raw);
-      return p && p.className && p.seatNo && p.studentName ? p : null;
+      if (p && p.className && p.seatNo && p.studentName) {
+        p.schoolYear = p.schoolYear || CURRENT_SCHOOL_YEAR;
+        return p;
+      }
+      return null;
     } catch {
       return null;
     }
   }
 
   saveProfile(profile) {
+    if (profile && !profile.schoolYear) {
+      profile.schoolYear = CURRENT_SCHOOL_YEAR;
+    }
     this.profile = profile;
     try {
       if (profile) {
@@ -70,7 +84,7 @@ export class CloudLearningTracker {
       // ignore
     }
     if (profile && this.app && this.app.state) {
-      this.app.state.studentName = `${profile.className} ${profile.seatNo}號 ${profile.studentName}`;
+      this.app.state.studentName = `${profile.schoolYear} ${profile.className} ${profile.seatNo}號 ${profile.studentName}`;
     }
     this.updateTopBarLoginButton();
   }
@@ -332,11 +346,13 @@ export class CloudLearningTracker {
       });
     }
 
-    const docId = `${this.profile.className}_${String(this.profile.seatNo).padStart(2, "0")}`;
+    const schoolYear = this.profile.schoolYear || CURRENT_SCHOOL_YEAR;
+    const docId = `${schoolYear}_${this.profile.className}_${String(this.profile.seatNo).padStart(2, "0")}`;
     const overallWeek01Pct = Math.round((l1.pct + l2.pct) / 2);
 
     return {
       docId,
+      schoolYear,
       className: this.profile.className,
       seatNo: String(this.profile.seatNo).padStart(2, "0"),
       studentName: this.profile.studentName,
@@ -405,10 +421,11 @@ export class CloudLearningTracker {
     }
   }
 
-  // 學生跨裝置登入時，嘗試從雲端取回既有學習紀錄
-  async tryRestoreStudentFromCloud(className, seatNo, studentName, pinCode) {
+  // 學生跨裝置登入時，嘗試從雲端取回既有學習紀錄（以「學年度_班級_座號」獨立建檔，避免跨學年度同班名混淆）
+  async tryRestoreStudentFromCloud(schoolYear, className, seatNo, studentName, pinCode) {
     const paddedSeat = String(seatNo).padStart(2, "0");
-    const docId = `${className}_${paddedSeat}`;
+    const yr = schoolYear || CURRENT_SCHOOL_YEAR;
+    const docId = `${yr}_${className}_${paddedSeat}`;
 
     let existing = this.liveRecords[docId] || null;
     if (this.isCloudConnected && this.db && this.firestoreModule) {
@@ -428,7 +445,7 @@ export class CloudLearningTracker {
       if (existing.pinCode && existing.pinCode !== pinCode) {
         return {
           ok: false,
-          message: `⚠️ 「${className} ${paddedSeat}號」已由「${existing.studentName}」設定個人通行碼（PIN），請輸入正確的 4 碼通行碼，或確認座號是否填錯！`
+          message: `⚠️ 「${yr} ${className} ${paddedSeat}號」已由「${existing.studentName}」設定個人通行碼（PIN），請輸入正確的 4 碼通行碼，或確認學年度／座號是否填錯！`
         };
       }
 
@@ -532,21 +549,26 @@ export class CloudLearningTracker {
         : this.syncStatus === "error"
         ? "本機備份(雲端異常)"
         : "本機已記錄";
-    btn.innerHTML = `${statusIcon} <span>${this.profile.className} ${this.profile.seatNo}號 ${this.profile.studentName}</span> <small class="sync-tag">${statusLabel}</small>`;
+    const yr = this.profile.schoolYear || CURRENT_SCHOOL_YEAR;
+    btn.innerHTML = `${statusIcon} <span>${yr} ${this.profile.className} ${this.profile.seatNo}號 ${this.profile.studentName}</span> <small class="sync-tag">${statusLabel}</small>`;
     btn.className = "btn btn-student-pill is-logged-in";
-    btn.title = `目前登入：${this.profile.className} ${this.profile.seatNo}號 ${this.profile.studentName}（${statusLabel}，點此切換或檢視個人歷程）`;
+    btn.title = `目前登入：${yr} ${this.profile.className} ${this.profile.seatNo}號 ${this.profile.studentName}（${statusLabel}，點此切換或檢視個人歷程）`;
   }
 
   // 開啟「學生登入與學習歷程狀態」彈窗
   openStudentLoginModal() {
     if (!this.app) return;
     const p = this.profile || {
+      schoolYear: CURRENT_SCHOOL_YEAR,
       className: DEFAULT_CLASSES[0],
       seatNo: "01",
       studentName: "",
       pinCode: ""
     };
 
+    const yearOptions = DEFAULT_SCHOOL_YEARS.map(
+      (y) => `<option value="${y}" ${(p.schoolYear || CURRENT_SCHOOL_YEAR) === y ? "selected" : ""}>${y}</option>`
+    ).join("");
     const classOptions = DEFAULT_CLASSES.map(
       (c) => `<option value="${c}" ${p.className === c ? "selected" : ""}>${c}</option>`
     ).join("");
@@ -563,7 +585,7 @@ export class CloudLearningTracker {
     const summaryHtml = currentRecord
       ? `
         <div class="section-card" style="margin-top:14px; background:var(--surface-alt);">
-          <h4 style="margin:0 0 8px;">📊 你目前的學習歷程摘要</h4>
+          <h4 style="margin:0 0 8px;">📊 你目前的學習歷程摘要（${currentRecord.schoolYear} · ${currentRecord.className} ${currentRecord.seatNo}號）</h4>
           <p class="wk-small" style="margin:4px 0;">
             <strong>第 1 節（電路的四個部分）：</strong>完成度 <strong>${currentRecord.l1.pct}%</strong>
             （畫重點 ${currentRecord.l1.markDone}/${currentRecord.l1.markTotal} · 隨讀題 ${currentRecord.l1.studyDone}/${currentRecord.l1.studyTotal} · 任務 ${currentRecord.l1.taskDone}/${currentRecord.l1.taskTotal} · 一次答對率 ${currentRecord.l1.firstTryRate}%）
@@ -582,11 +604,22 @@ export class CloudLearningTracker {
     const html = `
       <div class="student-login-modal">
         <div style="margin-bottom:10px;">${cloudBadge}</div>
-        <p style="margin-top:0;">請輸入你的<strong>班級、座號、姓名與 4 碼個人通行碼（PIN）</strong>。登入後，你在課本導讀、隨讀題、電路模擬器與測驗的每一步都會自動記錄，老師在後台也能即時看到你的進度並給予協助！</p>
+        <p style="margin-top:0;">請輸入你的<strong>學年度、班級、座號、姓名與 4 碼個人通行碼（PIN）</strong>。系統會以「學年度＋班級＋座號」獨立建檔，跨年度同班名（如不同屆的汽車二甲）資料完全獨立不混淆！</p>
 
-        <div class="wk-two-col" style="gap:12px;">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:12px;">
           <div>
-            <label class="wk-bold wk-small" for="login-class-select">1. 選擇或輸入班級</label>
+            <label class="wk-bold wk-small" for="login-year-select">1. 學年度</label>
+            <div style="display:flex; gap:6px; margin-top:4px;">
+              <select id="login-year-select" class="input-field" style="flex:1;">
+                ${yearOptions}
+                <option value="__custom__">其他學年度（自訂）</option>
+              </select>
+              <input type="text" id="login-year-custom" class="input-field" placeholder="如 119學年度" style="flex:1; display:none;" />
+            </div>
+          </div>
+
+          <div>
+            <label class="wk-bold wk-small" for="login-class-select">2. 選擇或輸入班級</label>
             <div style="display:flex; gap:6px; margin-top:4px;">
               <select id="login-class-select" class="input-field" style="flex:1;">
                 ${classOptions}
@@ -597,7 +630,7 @@ export class CloudLearningTracker {
           </div>
 
           <div>
-            <label class="wk-bold wk-small" for="login-seat-select">2. 座號</label>
+            <label class="wk-bold wk-small" for="login-seat-select">3. 座號</label>
             <select id="login-seat-select" class="input-field" style="width:100%; margin-top:4px;">
               ${seatOptions}
             </select>
@@ -606,12 +639,12 @@ export class CloudLearningTracker {
 
         <div class="wk-two-col" style="gap:12px; margin-top:12px;">
           <div>
-            <label class="wk-bold wk-small" for="login-student-name">3. 真實姓名</label>
+            <label class="wk-bold wk-small" for="login-student-name">4. 真實姓名</label>
             <input type="text" id="login-student-name" class="input-field" value="${p.studentName || ""}" placeholder="例如：王小明" maxlength="20" style="width:100%; margin-top:4px;" />
           </div>
 
           <div>
-            <label class="wk-bold wk-small" for="login-student-pin">4. 個人 4 碼通行碼（防同學誤填／換機載入用）</label>
+            <label class="wk-bold wk-small" for="login-student-pin">5. 個人 4 碼通行碼（防同學誤填／換機載入用）</label>
             <input type="password" id="login-student-pin" class="input-field" value="${p.pinCode || ""}" placeholder="請設定 4 位數字，如 1234" maxlength="8" style="width:100%; margin-top:4px;" />
           </div>
         </div>
@@ -641,6 +674,17 @@ export class CloudLearningTracker {
 
     this.app.openModal("👤 學生學習歷程登入與雲端同步", html);
 
+    const yearSelect = document.getElementById("login-year-select");
+    const yearCustom = document.getElementById("login-year-custom");
+    if (p.schoolYear && !DEFAULT_SCHOOL_YEARS.includes(p.schoolYear)) {
+      yearSelect.value = "__custom__";
+      yearCustom.style.display = "block";
+      yearCustom.value = p.schoolYear;
+    }
+    yearSelect?.addEventListener("change", () => {
+      yearCustom.style.display = yearSelect.value === "__custom__" ? "block" : "none";
+    });
+
     const classSelect = document.getElementById("login-class-select");
     const classCustom = document.getElementById("login-class-custom");
     if (p.className && !DEFAULT_CLASSES.includes(p.className)) {
@@ -653,6 +697,8 @@ export class CloudLearningTracker {
     });
 
     document.getElementById("btn-confirm-student-login")?.addEventListener("click", async () => {
+      const schoolYear =
+        yearSelect.value === "__custom__" ? yearCustom.value.trim() : yearSelect.value;
       const className =
         classSelect.value === "__custom__" ? classCustom.value.trim() : classSelect.value;
       const seatNo = document.getElementById("login-seat-select").value;
@@ -660,6 +706,11 @@ export class CloudLearningTracker {
       const pinCode = document.getElementById("login-student-pin").value.trim();
       const fb = document.getElementById("login-feedback-msg");
 
+      if (!schoolYear) {
+        fb.className = "wk-feedback error";
+        fb.textContent = "請選擇或輸入學年度（如 115學年度）。";
+        return;
+      }
       if (!className) {
         fb.className = "wk-feedback error";
         fb.textContent = "請選擇或輸入班級名稱。";
@@ -679,14 +730,15 @@ export class CloudLearningTracker {
       fb.className = "wk-feedback";
       fb.textContent = "⏳ 正在核對並同步學習歷程...";
 
-      const check = await this.tryRestoreStudentFromCloud(className, seatNo, studentName, pinCode);
+      const check = await this.tryRestoreStudentFromCloud(schoolYear, className, seatNo, studentName, pinCode);
       if (!check.ok) {
         fb.className = "wk-feedback error";
         fb.textContent = check.message;
         return;
       }
 
-      this.saveProfile({ className, seatNo, studentName, pinCode });
+      this.saveProfile({ schoolYear, className, seatNo, studentName, pinCode });
+      this.selectedYearFilter = schoolYear;
       this.selectedClassFilter = className;
       await this.syncStudentProgress();
       this.app.saveState();
@@ -696,8 +748,8 @@ export class CloudLearningTracker {
       }
       this.app.showToast(
         check.restored
-          ? `🎉 歡迎回來，${className} ${seatNo}號 ${studentName}！已為你載入先前的學習歷程。`
-          : `✅ 已登入：${className} ${seatNo}號 ${studentName}，學習歷程將自動同步記錄！`
+          ? `🎉 歡迎回來，${schoolYear} ${className} ${seatNo}號 ${studentName}！已為你載入先前的學習歷程。`
+          : `✅ 已登入：${schoolYear} ${className} ${seatNo}號 ${studentName}，學習歷程將自動同步記錄！`
       );
     });
 
@@ -713,7 +765,7 @@ export class CloudLearningTracker {
       const blob = new Blob([JSON.stringify(rec, null, 2)], { type: "application/json" });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
-      a.download = `基本電學歷程_${rec.className}_${rec.seatNo}號_${rec.studentName}.json`;
+      a.download = `基本電學歷程_${rec.schoolYear}_${rec.className}_${rec.seatNo}號_${rec.studentName}.json`;
       a.click();
     });
 
@@ -725,7 +777,7 @@ export class CloudLearningTracker {
   }
 
   // 產生 15 位模擬班級學生資料（供老師在尚未填入 Firebase 金鑰前，立即體驗全班紅綠燈戰情室與 CSV 匯出）
-  seedDemoClassroomData(targetClass = "汽車一甲") {
+  seedDemoClassroomData(targetYear = CURRENT_SCHOOL_YEAR, targetClass = "汽車一甲") {
     const sampleNames = [
       "陳冠宇", "林承翰", "黃柏諺", "張家豪", "李宥廷",
       "王品睿", "吳宇翔", "劉子軒", "蔡承恩", "楊宗翰",
@@ -736,7 +788,7 @@ export class CloudLearningTracker {
 
     sampleNames.forEach((name, idx) => {
       const seatNo = String(idx + 1).padStart(2, "0");
-      const docId = `${targetClass}_${seatNo}`;
+      const docId = `${targetYear}_${targetClass}_${seatNo}`;
 
       // 設計不同學習狀態：約 55% 綠燈通關、25% 黃燈進行中、20% 紅燈卡關需救援
       let mode = "green";
@@ -781,6 +833,7 @@ export class CloudLearningTracker {
 
       this.liveRecords[docId] = {
         docId,
+        schoolYear: targetYear,
         className: targetClass,
         seatNo,
         studentName: name,
@@ -834,18 +887,29 @@ export class CloudLearningTracker {
     this.notifyListeners();
   }
 
-  // 匯出全班 Excel (CSV) 平時成績單（含 UTF-8 BOM 防亂碼）
-  exportClassCsv(classNameFilter = "ALL") {
+  // 匯出全班 Excel (CSV) 平時成績單（含 UTF-8 BOM 防亂碼，支援依學年度與班級篩選）
+  exportClassCsv(yearFilter = "ALL", classNameFilter = "ALL") {
     const records = Object.values(this.liveRecords)
-      .filter((r) => classNameFilter === "ALL" || r.className === classNameFilter)
-      .sort((a, b) => a.className.localeCompare(b.className, "zh-Hant") || a.seatNo.localeCompare(b.seatNo));
+      .filter((r) => {
+        const yr = r.schoolYear || CURRENT_SCHOOL_YEAR;
+        const matchYear = yearFilter === "ALL" || yr === yearFilter;
+        const matchCls = classNameFilter === "ALL" || r.className === classNameFilter;
+        return matchYear && matchCls;
+      })
+      .sort(
+        (a, b) =>
+          (a.schoolYear || CURRENT_SCHOOL_YEAR).localeCompare(b.schoolYear || CURRENT_SCHOOL_YEAR, "zh-Hant") ||
+          a.className.localeCompare(b.className, "zh-Hant") ||
+          a.seatNo.localeCompare(b.seatNo)
+      );
 
     if (!records.length) {
-      if (this.app) this.app.showToast("⚠️ 目前尚無該班級的學生紀錄可匯出。");
+      if (this.app) this.app.showToast("⚠️ 目前尚無符合篩選條件的學生紀錄可匯出。");
       return;
     }
 
     const headers = [
+      "學年度",
       "班級",
       "座號",
       "姓名",
@@ -883,6 +947,7 @@ export class CloudLearningTracker {
     const lightLabel = (l) => (l === "red" ? "紅燈(需救援)" : l === "green" ? "綠燈(已通關)" : "黃燈(進行中)");
 
     const rows = records.map((r) => [
+      r.schoolYear || CURRENT_SCHOOL_YEAR,
       r.className,
       r.seatNo,
       r.studentName,
@@ -920,7 +985,7 @@ export class CloudLearningTracker {
     const a = document.createElement("a");
     const dateStr = new Date().toISOString().slice(0, 10);
     a.href = url;
-    a.download = `基本電學練工坊_學習歷程成績單_${classNameFilter}_${dateStr}.csv`;
+    a.download = `基本電學練工坊_學習歷程成績單_${yearFilter}_${classNameFilter}_${dateStr}.csv`;
     a.click();
     if (this.app) {
       this.app.showToast(`📥 已匯出 ${records.length} 位學生的 Excel (CSV) 學習歷程成績單！`);
@@ -972,12 +1037,24 @@ export class CloudLearningTracker {
       return;
     }
 
-    // 篩選目前班級名單
+    // 篩選目前學年度與班級名單
     const allRecords = Object.values(this.liveRecords);
+    const availableYears = Array.from(
+      new Set([
+        ...DEFAULT_SCHOOL_YEARS,
+        ...allRecords.map((r) => r.schoolYear || CURRENT_SCHOOL_YEAR).filter(Boolean)
+      ])
+    );
     const availableClasses = Array.from(
       new Set([...DEFAULT_CLASSES, ...allRecords.map((r) => r.className).filter(Boolean)])
     );
-    const filtered = allRecords
+
+    const yearMatchedRecords = allRecords.filter((r) => {
+      const yr = r.schoolYear || CURRENT_SCHOOL_YEAR;
+      return this.selectedYearFilter === "ALL" || yr === this.selectedYearFilter;
+    });
+
+    const filtered = yearMatchedRecords
       .filter((r) => this.selectedClassFilter === "ALL" || r.className === this.selectedClassFilter)
       .sort((a, b) => {
         if (this.sortBy === "status") {
@@ -987,7 +1064,11 @@ export class CloudLearningTracker {
         if (this.sortBy === "progress") {
           return (b.overallWeek01Pct ?? 0) - (a.overallWeek01Pct ?? 0) || a.seatNo.localeCompare(b.seatNo);
         }
-        return a.className.localeCompare(b.className, "zh-Hant") || a.seatNo.localeCompare(b.seatNo);
+        return (
+          (a.schoolYear || CURRENT_SCHOOL_YEAR).localeCompare(b.schoolYear || CURRENT_SCHOOL_YEAR, "zh-Hant") ||
+          a.className.localeCompare(b.className, "zh-Hant") ||
+          a.seatNo.localeCompare(b.seatNo)
+        );
       });
 
     const totalCount = filtered.length;
@@ -1029,10 +1110,18 @@ export class CloudLearningTracker {
       .sort((a, b) => b.studentCount - a.studentCount || b.totalErrors - a.totalErrors)
       .slice(0, 4);
 
+    const yearOptsHtml = [
+      `<option value="ALL" ${this.selectedYearFilter === "ALL" ? "selected" : ""}>全部學年度（共 ${allRecords.length} 人）</option>`,
+      ...availableYears.map((y) => {
+        const cnt = allRecords.filter((r) => (r.schoolYear || CURRENT_SCHOOL_YEAR) === y).length;
+        return `<option value="${y}" ${this.selectedYearFilter === y ? "selected" : ""}>${y}（${cnt} 人）</option>`;
+      })
+    ].join("");
+
     const classOptsHtml = [
-      `<option value="ALL" ${this.selectedClassFilter === "ALL" ? "selected" : ""}>全部班級（共 ${allRecords.length} 人）</option>`,
+      `<option value="ALL" ${this.selectedClassFilter === "ALL" ? "selected" : ""}>全部班級（共 ${yearMatchedRecords.length} 人）</option>`,
       ...availableClasses.map((c) => {
-        const cnt = allRecords.filter((r) => r.className === c).length;
+        const cnt = yearMatchedRecords.filter((r) => r.className === c).length;
         return `<option value="${c}" ${this.selectedClassFilter === c ? "selected" : ""}>${c}（${cnt} 人）</option>`;
       })
     ].join("");
@@ -1093,7 +1182,7 @@ export class CloudLearningTracker {
       ? `
       <div class="war-student-detail-card">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-          <h4 style="margin:0;">🔍 學生個人學習歷程明細：${detailStudent.className} ${detailStudent.seatNo}號 ${detailStudent.studentName}</h4>
+          <h4 style="margin:0;">🔍 學生個人學習歷程明細：${detailStudent.schoolYear || CURRENT_SCHOOL_YEAR} · ${detailStudent.className} ${detailStudent.seatNo}號 ${detailStudent.studentName}</h4>
           <button type="button" class="btn" id="btn-close-student-detail">✕ 收合明細</button>
         </div>
         <div class="wk-two-col" style="margin-top:10px;">
@@ -1161,6 +1250,7 @@ export class CloudLearningTracker {
             return `
               <tr class="${r.statusLight === "red" ? "war-row-alert" : ""}">
                 <td>${lightBadge}</td>
+                <td><span class="badge badge-sample">${r.schoolYear || CURRENT_SCHOOL_YEAR}</span></td>
                 <td><strong>${r.className}</strong></td>
                 <td><strong>${r.seatNo} 號</strong></td>
                 <td><strong>${r.studentName}</strong></td>
@@ -1185,8 +1275,8 @@ export class CloudLearningTracker {
           .join("")
       : `
         <tr>
-          <td colspan="11" style="text-align:center; padding:24px;">
-            目前「${this.selectedClassFilter === "ALL" ? "全部班級" : this.selectedClassFilter}」尚無學生登入紀錄。<br/>
+          <td colspan="12" style="text-align:center; padding:24px;">
+            目前「${this.selectedYearFilter === "ALL" ? "全部學年度" : this.selectedYearFilter} · ${this.selectedClassFilter === "ALL" ? "全部班級" : this.selectedClassFilter}」尚無學生登入紀錄。<br/>
             請學生點擊畫面右上角「<strong>👤 學生登入</strong>」開始作答，或點上方「<strong>🧪 載入模擬班級資料（15人）</strong>」立即預覽戰情室效果！
           </td>
         </tr>
@@ -1197,7 +1287,7 @@ export class CloudLearningTracker {
         <div>
           <h3 style="margin:0;">📡 全班學習歷程即時戰情室（Firebase 雲端後台）</h3>
           <p class="wk-muted wk-small" style="margin:4px 0 0;">
-            學生在前端勾選課本重點、作答隨讀題或操作模擬器時，系統會自動雙軌記錄（本機＋Firebase 雲端），並即時標示 🔴 需救援學生。
+            學生在前端勾選課本重點、作答隨讀題或操作模擬器時，系統會以「<strong>學年度＋班級＋座號</strong>」獨立建檔並雙軌記錄（本機＋Firebase 雲端），跨學年度同班名完全獨立不混淆。
           </p>
         </div>
         ${cloudStatusBadge}
@@ -1206,12 +1296,17 @@ export class CloudLearningTracker {
       <!-- 工具列 -->
       <div class="war-toolbar">
         <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-          <label class="wk-small wk-bold" for="war-class-filter">班級篩選：</label>
-          <select id="war-class-filter" class="input-field" style="min-width:160px;">
+          <label class="wk-small wk-bold" for="war-year-filter">📅 學年度：</label>
+          <select id="war-year-filter" class="input-field" style="min-width:145px;">
+            ${yearOptsHtml}
+          </select>
+
+          <label class="wk-small wk-bold" for="war-class-filter" style="margin-left:4px;">🏫 班級：</label>
+          <select id="war-class-filter" class="input-field" style="min-width:155px;">
             ${classOptsHtml}
           </select>
 
-          <label class="wk-small wk-bold" for="war-sort-select" style="margin-left:6px;">排序：</label>
+          <label class="wk-small wk-bold" for="war-sort-select" style="margin-left:4px;">排序：</label>
           <select id="war-sort-select" class="input-field">
             <option value="seat" ${this.sortBy === "seat" ? "selected" : ""}>依座號由小到大</option>
             <option value="status" ${this.sortBy === "status" ? "selected" : ""}>🔴 需救援優先顯示</option>
@@ -1268,6 +1363,7 @@ export class CloudLearningTracker {
           <thead>
             <tr>
               <th>預警燈號</th>
+              <th>學年度</th>
               <th>班級</th>
               <th>座號</th>
               <th>姓名</th>
@@ -1290,6 +1386,11 @@ export class CloudLearningTracker {
     container.appendChild(box);
 
     // 綁定互動事件
+    box.querySelector("#war-year-filter")?.addEventListener("change", (e) => {
+      this.selectedYearFilter = e.target.value;
+      this.renderTeacherWarRoom(container);
+    });
+
     box.querySelector("#war-class-filter")?.addEventListener("change", (e) => {
       this.selectedClassFilter = e.target.value;
       this.renderTeacherWarRoom(container);
@@ -1301,17 +1402,19 @@ export class CloudLearningTracker {
     });
 
     box.querySelector("#btn-seed-demo-class")?.addEventListener("click", () => {
+      const targetYr = this.selectedYearFilter === "ALL" ? CURRENT_SCHOOL_YEAR : this.selectedYearFilter;
       const targetCls = this.selectedClassFilter === "ALL" ? "汽車一甲" : this.selectedClassFilter;
-      this.seedDemoClassroomData(targetCls);
+      this.seedDemoClassroomData(targetYr, targetCls);
+      this.selectedYearFilter = targetYr;
       this.selectedClassFilter = targetCls;
       this.renderTeacherWarRoom(container);
       if (this.app) {
-        this.app.showToast(`🧪 已載入「${targetCls}」15 位模擬學生的紅綠燈學習歷程資料！`);
+        this.app.showToast(`🧪 已載入「${targetYr} · ${targetCls}」15 位模擬學生的紅綠燈學習歷程資料！`);
       }
     });
 
     box.querySelector("#btn-export-class-csv")?.addEventListener("click", () => {
-      this.exportClassCsv(this.selectedClassFilter);
+      this.exportClassCsv(this.selectedYearFilter, this.selectedClassFilter);
     });
 
     box.querySelector("#btn-import-student-json")?.addEventListener("click", () => {

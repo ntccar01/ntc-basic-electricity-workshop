@@ -39,8 +39,8 @@ export const CLASS_DISPLAY_LABELS = {
   "汽車一": "汽車一（學弟妹先修體驗）"
 };
 
-// 教師後台管理帳密之 SHA-256 單向加密雜湊碼（不在公開程式碼中存放明文帳號與密碼）
-// 教師登入後台後，可隨時點擊「🔑 修改教師帳密」自訂專屬帳號與密碼並自動加密同步至 Firebase 雲端
-export const DEFAULT_TEACHER_AUTH_HASH =
-  "792a2297236b3d5c360ffbd26e30ec6ee72a07bcfa3f3000e27408bac5e55f90";
+// 教師帳號白名單（Firebase Authentication 電子郵件／密碼登入）
+// ⚠️ 真正的權限控管在 Firestore 安全規則中（規則內的 isTeacher() 也必須列出相同信箱）
+// 密碼由 Firebase 官方管理，不存放在本網站任何程式碼中
+export const TEACHER_EMAILS = ["lin1102@gm.ntc.edu.tw"];
 

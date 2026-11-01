@@ -148,6 +148,18 @@ export class CloudLearningTracker {
       const fbApp = existingApps.length
         ? existingApps[0]
         : appMod.initializeApp(this.firebaseConfig);
+
+      // 若專案啟用了匿名登入規則 (request.auth != null)，自動嘗試匿名登入（若未啟用則靜默略過）
+      try {
+        const authMod = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
+        const auth = authMod.getAuth(fbApp);
+        if (!auth.currentUser) {
+          await authMod.signInAnonymously(auth);
+        }
+      } catch {
+        // 專案未啟用 Anonymous Auth 時靜默略過，直接進行 Firestore 連線
+      }
+
       this.db = fsMod.getFirestore(fbApp);
       this.isCloudConnected = true;
       this.cloudError = "";

@@ -8,12 +8,12 @@
 // ============================================================================
 
 export const DEFAULT_FIREBASE_CONFIG = {
-  apiKey: "",            // 例如: "AIzaSyA1234567890abcdefghijklmnop"
-  authDomain: "",        // 例如: "ntc-elec-workshop.firebaseapp.com"
-  projectId: "",         // 例如: "ntc-elec-workshop"
-  storageBucket: "",     // 例如: "ntc-elec-workshop.firebasestorage.app"
-  messagingSenderId: "", // 例如: "123456789012"
-  appId: ""              // 例如: "1:123456789012:web:abcdef1234567890"
+  apiKey: "AIzaSyBhamHPMCBjGQMpxTtX43JLcPab7QfsTgg",
+  authDomain: "classtool1141019.firebaseapp.com",
+  projectId: "classtool1141019",
+  storageBucket: "classtool1141019.firebasestorage.app",
+  messagingSenderId: "864195851107",
+  appId: "1:864195851107:web:de3fd1a48896528b145956"
 };
 
 // 預設學年度清單（避免跨年度同班名「汽車二」資料混淆，每筆紀錄皆以「學年度_班級_座號」獨立建檔）

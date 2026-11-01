@@ -1369,6 +1369,24 @@ html[data-reduced-motion="true"] *::after {
   margin: 12px 0;
 }
 
+.wk-badge-row {
+  margin-bottom: 8px;
+}
+
+.wk-book-ref-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--accent-soft);
+  color: var(--ink);
+  border: 1.5px solid var(--accent);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 0.84rem;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
 .wk-check-card h5 {
   margin: 0 0 10px;
   font-size: 1rem;

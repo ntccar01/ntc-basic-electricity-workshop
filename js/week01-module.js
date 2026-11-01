@@ -1,27 +1,36 @@
 // 基本電學探索島｜18 週學期地圖與第 1 週（CH3 p.68–70）課本導讀、畫重點、SVG 圖解、7 種互動題型、電路模擬器與教師引導模組
 
 export const COURSE = {
-  version: "2026-10-28-w1-v5",
-  title: "基本電學探索島",
+  version: "2026-11-01-planA-v6",
+  title: "基本電學探索島（方案 A 認知鷹架學習路徑）",
+  routeStages: [
+    { step: 1, weeks: "第 1 週", islandId: "island-03", islandName: "第 3 課：串聯電路", title: "車燈破冰：四元件與通／斷／短路", badge: "🚩 W1 起點" },
+    { step: 2, weeks: "第 2–5 週", islandId: "island-01", islandName: "第 1 課：電的基本認識", title: "電荷 → 電流 → 電壓 → 功率", badge: "⚓ W2–5" },
+    { step: 3, weeks: "第 6–8 週", islandId: "island-02", islandName: "第 2 課：電阻", title: "色碼 → 歐姆定律優先 → 溫度與焦耳熱", badge: "⚓ W6–8" },
+    { step: 4, weeks: "第 9–11 週", islandId: "island-03", islandName: "第 3 課：串聯電路", title: "串聯單一迴路 → KVL 分壓 → 故障診斷", badge: "⚓ W9–11" },
+    { step: 5, weeks: "第 12–14 週", islandId: "island-04", islandName: "第 4 課：並聯電路", title: "並聯分支 → KCL 分流 → 惠斯登電橋", badge: "⚓ W12–14" },
+    { step: 6, weeks: "第 15–16 週", islandId: "island-05", islandName: "第 5 課：電容與電感", title: "電容儲能屏蔽 → 馬達左手／發電機右手", badge: "⚓ W15–16" },
+    { step: 7, weeks: "第 17–18 週", islandId: "center-island", islandName: "中央島：基本電學練工坊", title: "弱點補強 → 車用電系跨章節總整合", badge: "🧭 W17–18" }
+  ],
   weeks: [
-    { id: 1, islandId: "island-03", islandName: "第 3 課：串聯電路", title: "讓車燈亮起來", source: "CH3 p.68–70", status: "open", lessons: ["電路的四個部分", "通路、斷路與短路"], goal: "能辨認電源、導線、開關、負載，並判斷車燈不亮的原因。" },
-    { id: 2, islandId: "island-01", islandName: "第 1 課：電的基本認識", title: "電荷與電子", source: "CH1 p.2–12", status: "planned", lessons: ["原子、電子與導體", "電荷與靜電"], goal: "能用圖解說明電荷移動與靜電現象。" },
-    { id: 3, islandId: "island-01", islandName: "第 1 課：電的基本認識", title: "單位與電壓", source: "CH1 p.5–7、13–18", status: "planned", lessons: ["常用電學單位", "電壓與兩點間的差"], goal: "能辨認電壓及其量測位置。" },
-    { id: 4, islandId: "island-01", islandName: "第 1 課：電的基本認識", title: "電流", source: "CH1 p.19–21", status: "planned", lessons: ["電流的意義", "方向與簡單計算"], goal: "能分辨傳統電流與電子移動方向。" },
-    { id: 5, islandId: "island-01", islandName: "第 1 課：電的基本認識", title: "電功率與電能", source: "CH1 p.22–29", status: "planned", lessons: ["車燈的功率", "電能與單元回顧"], goal: "能讀懂簡單電器標示與功率、時間的關係。" },
-    { id: 6, islandId: "island-02", islandName: "第 2 課：電阻", title: "電阻與元件", source: "CH2 p.36–51", status: "planned", lessons: ["電阻限制電流", "電阻器與色碼"], goal: "能從實物與電路圖辨認電阻器。" },
-    { id: 7, islandId: "island-02", islandName: "第 2 課：電阻", title: "歐姆定律入門", source: "CH2 p.48–56", status: "planned", lessons: ["溫度與電阻", "從讀值建立關係"], goal: "能判斷電壓、電流與電阻的變化。" },
-    { id: 8, islandId: "island-02", islandName: "第 2 課：電阻", title: "歐姆定律解題板", source: "CH2 p.52–60", status: "planned", lessons: ["分步列式", "焦耳定律與補救"], goal: "能辨認已知量、列式並檢查單位。" },
-    { id: 9, islandId: "island-03", islandName: "第 3 課：串聯電路", title: "串聯電路", source: "CH3 p.68–76", status: "planned", lessons: ["只有一條路", "串聯的電流與電阻"], goal: "能指出串聯電路的單一路徑。" },
-    { id: 10, islandId: "island-03", islandName: "第 3 課：串聯電路", title: "沿路看電壓", source: "CH3 p.77–81", status: "planned", lessons: ["克希荷夫電壓定律", "電壓分配"], goal: "能沿迴路解釋電壓關係。" },
-    { id: 11, islandId: "island-03", islandName: "第 3 課：串聯電路", title: "串聯故障診斷", source: "CH3 p.82–86", status: "planned", lessons: ["串聯應用", "故障判讀與回顧"], goal: "能根據現象選擇合理的檢查點。" },
-    { id: 12, islandId: "island-04", islandName: "第 4 課：並聯電路", title: "並聯電路", source: "CH4 p.90–97", status: "planned", lessons: ["看出分支", "並聯的電壓與電流"], goal: "能指出並聯的不同支路。" },
-    { id: 13, islandId: "island-04", islandName: "第 4 課：並聯電路", title: "分流與匯流", source: "CH4 p.98–102", status: "planned", lessons: ["克希荷夫電流定律", "電流分配"], goal: "能說明各支路電流如何形成總電流。" },
-    { id: 14, islandId: "island-04", islandName: "第 4 課：並聯電路", title: "串並聯整合", source: "CH4 p.103–112", status: "planned", lessons: ["並聯應用", "簡單混合電路"], goal: "能先辨認連接方式再計算。" },
-    { id: 15, islandId: "island-05", islandName: "第 5 課：電容與電感", title: "電容與電場", source: "CH5 p.122–146", status: "planned", lessons: ["電容器與充放電", "電場與電位的圖像"], goal: "能辨認電容器構造和儲能現象。" },
-    { id: 16, islandId: "island-05", islandName: "第 5 課：電容與電感", title: "電感與磁", source: "CH5 p.147–171", status: "planned", lessons: ["電感器與磁場", "電磁現象與車用案例"], goal: "能描述電磁現象，較深計算依課程進度選用。" },
-    { id: 17, islandId: "center-island", islandName: "中央島：基本電學練工坊", title: "彈性補救", source: "依班級進度", status: "planned", lessons: ["未完成站點", "常見錯誤修復"], goal: "依學習紀錄補強較弱的概念。" },
-    { id: 18, islandId: "center-island", islandName: "中央島：基本電學練工坊", title: "整合任務", source: "CH1–CH5", status: "planned", lessons: ["車用電系綜合任務", "回顧與展示"], goal: "能依證據說明簡單電路的運作或故障。" }
+    { id: 1, islandId: "island-03", islandName: "第 3 課：串聯電路", title: "讓車燈亮起來（破冰起點）", source: "CH3 p.68–70", status: "open", lessons: ["電路的四個部分", "通路、斷路與短路"], goal: "能辨認電源、導線、開關、負載，並判斷車燈不亮的原因。" },
+    { id: 2, islandId: "island-01", islandName: "第 1 課：電的基本認識", title: "電荷、自由電子與靜電", source: "CH1 p.2–12 (1-1, 1-3)", status: "planned", lessons: ["原子、價電子與導體", "電荷與靜電感應"], goal: "能用圖解說明自由電子移動與靜電現象。" },
+    { id: 3, islandId: "island-01", islandName: "第 1 課：電的基本認識", title: "電流的形成與方向（先懂流動）", source: "CH1 p.19–21 (1-5)", status: "planned", lessons: ["電流的意義 I = Q / t", "傳統電流與電子流方向"], goal: "能理解電荷流動形成電流，並分辨傳統電流與電子流方向。" },
+    { id: 4, islandId: "island-01", islandName: "第 1 課：電的基本認識", title: "電壓、電位差與常用單位（再懂推力）", source: "CH1 p.5–7、13–18 (1-1.6, 1-4)", status: "planned", lessons: ["電壓推力 V = W / Q 與端電壓壓降", "SI 常用單位與乘冪換算"], goal: "能理解電壓是推動電流的原因，並辨認電動勢與端電壓的關係。" },
+    { id: 5, islandId: "island-01", islandName: "第 1 課：電的基本認識", title: "電功率、一度電與效率", source: "CH1 p.8–9、22–29 (1-2, 1-6)", status: "planned", lessons: ["車燈功率 P = V × I 與馬力", "一度電 (kWh) 與能量轉換效率"], goal: "能結合電壓與電流計算電功率、用電度數與系統效率。" },
+    { id: 6, islandId: "island-02", islandName: "第 2 課：電阻", title: "電阻定律與色碼電阻", source: "CH2 p.36–47 (2-1, 2-2)", status: "planned", lessons: ["影響電阻的因素 R = ρℓ/A", "四環色碼電阻與文數字標示"], goal: "能判斷導線長短粗細對電阻的影響，並正確判讀四環色碼電阻。" },
+    { id: 7, islandId: "island-02", islandName: "第 2 課：電阻", title: "歐姆定律與功率大貫通（核心優先）", source: "CH2 p.52–56 (2-4)", status: "planned", lessons: ["歐姆定律 I = V / R 關係圖解", "功率延伸公式 P = I²R = V² / R"], goal: "能優先貫通電壓、電流與電阻的歐姆定律關係並完成分步解題。" },
+    { id: 8, islandId: "island-02", islandName: "第 2 課：電阻", title: "溫度感測與焦耳熱效應專題", source: "CH2 p.42、48–51、57–60 (2-3, 2-5)", status: "planned", lessons: ["NTC/PTC 熱敏電阻與溫度係數 α", "焦耳定律 H = 0.24 I²Rt 與過熱防範"], goal: "能理解溫度如何改變電阻，並用焦耳熱效應解釋短路為何引發高溫火災。" },
+    { id: 9, islandId: "island-03", islandName: "第 3 課：串聯電路", title: "串聯單一迴路與總電阻", source: "CH3 p.70–76 (3-1)", status: "planned", lessons: ["節點、支路與串聯單一路徑", "串聯等電流與總電阻相加"], goal: "能指出串聯電路的單一路徑，並計算總電阻與迴路電流。" },
+    { id: 10, islandId: "island-03", islandName: "第 3 課：串聯電路", title: "沿路看電壓：KVL 與分壓定則", source: "CH3 p.77–81 (3-2, 3-3)", status: "planned", lessons: ["克希荷夫電壓定律（KVL）", "串聯電壓分配定則"], goal: "能沿封閉迴路驗證電壓升等於電壓降，並計算各電阻分壓。" },
+    { id: 11, islandId: "island-03", islandName: "第 3 課：串聯電路", title: "串聯應用與故障診斷", source: "CH3 p.82–86 (3-4)", status: "planned", lessons: ["限流電阻與電流錶串聯", "不同瓦數燈泡串聯與故障判讀"], goal: "能根據串聯分壓判斷哪顆燈泡較亮或先燒毀，並選出合理檢查點。" },
+    { id: 12, islandId: "island-04", islandName: "第 4 課：並聯電路", title: "並聯分支、等電壓與總電阻", source: "CH4 p.90–97 (4-1)", status: "planned", lessons: ["看出並聯分支與等電壓特性", "並聯總電導與總電阻計算"], goal: "能指出並聯的不同支路，並理解並聯總電阻小於任一支路電阻。" },
+    { id: 13, islandId: "island-04", islandName: "第 4 課：並聯電路", title: "節點分流与匯流：KCL 與分流定則", source: "CH4 p.98–102 (4-2, 4-3)", status: "planned", lessons: ["克希荷夫電流定律（KCL）", "並聯電流分配定則（反比分流）"], goal: "能說明各支路電流如何匯流成總電流，並完成反比分流計算。" },
+    { id: 14, islandId: "island-04", islandName: "第 4 課：並聯電路", title: "串並聯整合與惠斯登電橋", source: "CH4 p.103–112 (4-4, 4-5)", status: "planned", lessons: ["家用插座三線與汽車搭鐵並聯", "惠斯登電橋平衡 R₁R_x = R₂R_S"], goal: "能先辨認串並聯結構再化簡，並利用電橋平衡條件求出未知電阻。" },
+    { id: 15, islandId: "island-05", islandName: "第 5 課：電容與電感", title: "電容器儲能與車殼防雷屏蔽", source: "CH5 p.122–146 (5-1, 5-2)", status: "planned", lessons: ["平行板電容器充放電與串並聯", "電場、電位與金屬車殼靜電屏蔽"], goal: "能辨認電容器構造、串並聯規律與金屬內部 E=0 的防雷原理。" },
+    { id: 16, islandId: "island-05", islandName: "第 5 課：電容與電感", title: "電感、馬達左手與發電機右手定則", source: "CH5 p.147–171 (5-3～5-6)", status: "planned", lessons: ["電感器儲能與磁場基本特性", "佛萊明左手（電動機）與右手（發電機）"], goal: "能區分電生磁受力（馬達左手定則）與磁生電感應（發電機右手定則）。" },
+    { id: 17, islandId: "center-island", islandName: "中央島：基本電學練工坊", title: "弱點診斷與彈性補救", source: "依班級進度", status: "planned", lessons: ["未完成站點補強", "常見迷思概念修復"], goal: "依學習紀錄補強較弱的概念。" },
+    { id: 18, islandId: "center-island", islandName: "中央島：基本電學練工坊", title: "車用電系跨章節綜合任務", source: "CH1–CH5 總整合", status: "planned", lessons: ["車用電系綜合排故任務", "回顧與結業證書"], goal: "能依證據說明簡單電路的運作或故障。" }
   ]
 };
 
@@ -898,8 +907,40 @@ export class GuidedStudyController {
     this.append(topGrid, introCard, paceCard);
     wrap.appendChild(topGrid);
 
+    // 方案 A：7 站認知鷹架學習航線總覽
+    const routeCard = this.node("div", "section-card");
+    this.append(
+      routeCard,
+      this.node("h3", "", "🧭 方案 A 推薦學習航線（保留課本 5 章節島名 · 依直覺認知順序領航）"),
+      this.node(
+        "p",
+        "wk-muted wk-small",
+        "第 1 週先從第 3 課「車燈電路」破冰建立整體畫面 → 第 2–5 週回第 1 課依「電荷 → 電流(流動) → 電壓(推力) → 功率」直覺鏈學習 → 第 6–8 週在第 2 課優先貫通「歐姆定律」再學溫度與焦耳熱 → 第 9–16 週深入串聯、並聯與電容電感。"
+      )
+    );
+    const routeRow = this.node("div", "wk-btn-row");
+    COURSE.routeStages.forEach((st) => {
+      const b = this.btn(
+        `${st.badge}｜${st.islandName.split("：")[0]}（${st.title}）`,
+        () => {
+          if (this.app.scene3D) this.app.scene3D.flyToIsland(st.islandId);
+          if (st.step === 1) {
+            this.lessonNo = 1;
+            this.ui.studyIndex = 0;
+            this.app.openIslandDrawer("island-03", "guidedStudy");
+          } else {
+            this.app.openIslandDrawer(st.islandId, st.islandId === "center-island" ? "overview" : "textbook");
+          }
+        },
+        `btn ${st.step === 1 ? "btn-primary" : ""}`
+      );
+      routeRow.appendChild(b);
+    });
+    routeCard.appendChild(routeRow);
+    wrap.appendChild(routeCard);
+
     // 18 週卡片網格
-    const mapHeader = this.node("h3", "wk-section-heading", "🗓️ 18 週學期進度與 3D 島嶼對照總覽");
+    const mapHeader = this.node("h3", "wk-section-heading", "🗓️ 18 週學期進度與 3D 島嶼對照總覽（依方案 A 排序）");
     wrap.appendChild(mapHeader);
 
     const weekGrid = this.node("div", "wk-week-grid");
@@ -1037,6 +1078,15 @@ export class GuidedStudyController {
       "btn btn-accent"
     );
     tabBar.appendChild(toTeacherBtn);
+    const nextPlanABtn = this.btn(
+      "🚀 方案A下一站：第 1 課（W2–5 電荷→電流→電壓→功率）",
+      () => {
+        if (this.app.scene3D) this.app.scene3D.flyToIsland("island-01");
+        this.app.openIslandDrawer("island-01", "textbook");
+      },
+      "btn"
+    );
+    tabBar.appendChild(nextPlanABtn);
     wrap.appendChild(tabBar);
 
     // 今天要會的事
@@ -1107,16 +1157,18 @@ export class GuidedStudyController {
   renderPlannedIslandOverview(wrap, islandId, mode) {
     const islandWeeks = COURSE.weeks.filter((w) => w.islandId === islandId);
     const islObj = this.app.content.islands.find((x) => x.id === islandId);
-    const islTitle = islObj ? `第 ${islObj.order} 課：${islObj.name}` : "本島";
+    const islTitle = islObj ? `第 ${islObj.order} 課：${islObj.name}（${islObj.routeBadge || ""}）` : "本島";
 
     const card = this.node("div", "section-card");
     this.append(
       card,
-      this.node("h3", "", `🗓️ ${islTitle} — 對應學期週次規畫（共 ${islandWeeks.length} 週）`),
+      this.node("h3", "", `🗓️ ${islTitle} — 方案 A 對應週次規畫（共 ${islandWeeks.length} 週）`),
       this.node(
         "p",
         "",
-        "依照我們的開發計畫，目前已優先完整移植並開放「第 1 週：讓車燈亮起來（對應第 3 課 CH3 p.68–70）」。待您檢視第 1 週的課本導讀、SVG 圖解、7 種互動題型與教師模式確認無誤後，即可依相同規格繼續擴充本島週次！"
+        islObj && islObj.routeSummary
+          ? islObj.routeSummary
+          : "本島週次已依方案 A 認知鷹架重新排序，讓學生順著最自然的邏輯理解基本電學！"
       )
     );
 
@@ -1125,7 +1177,7 @@ export class GuidedStudyController {
       const wCard = this.node("div", "wk-week-card");
       this.append(
         wCard,
-        this.node("span", "wk-status planned", `第 ${w.id} 週｜規劃中`),
+        this.node("span", "wk-status planned", `第 ${w.id} 週｜方案 A 路徑`),
         this.node("h4", "", w.title),
         this.node("p", "wk-small", `預定兩節課：${w.lessons.join(" ／ ")}`),
         this.node("p", "wk-muted wk-small", `學習目標：${w.goal}`),
@@ -1139,22 +1191,29 @@ export class GuidedStudyController {
     this.append(
       actionRow,
       this.btn(
-        "⚡ 飛往第 3 島體驗「第 1 週：讓車燈亮起來」完整互動教材",
+        "📖 閱讀本島教材重點（已依方案 A 排序）",
+        () => {
+          this.app.openIslandDrawer(islandId, "textbook");
+        },
+        "btn btn-primary"
+      ),
+      this.btn(
+        "⚡ 飛往第 3 島體驗「第 1 週：讓車燈亮起來」破冰起點",
         () => {
           this.lessonNo = 1;
           this.ui.studyIndex = 0;
           if (this.app.scene3D) this.app.scene3D.flyToIsland("island-03");
           this.app.openIslandDrawer("island-03", mode === "teacher" ? "teacherMode" : "guidedStudy");
         },
-        "btn btn-primary"
+        "btn btn-accent"
       ),
       this.btn(
-        "👁️ 在本島直接預覽「第 1 週」教材",
+        "👁️ 在本島直接預覽「第 1 週」互動導讀",
         () => {
           this.ui.previewWeek01OnOtherIsland = true;
           this.app.renderDrawerBody();
         },
-        "btn btn-accent"
+        "btn"
       ),
       this.btn(
         "🗓️ 查看 18 週學期地圖",
@@ -2143,6 +2202,17 @@ export class GuidedStudyController {
             this.ui.studyIndex = 0;
             this.ui.task = 0;
             rerender();
+          },
+          "btn btn-primary"
+        )
+      );
+    } else {
+      row.appendChild(
+        this.btn(
+          "🚀 完成第 1 週！依方案A前往下一站：第 1 課（第 2–5 週：電荷→電流→電壓→功率） →",
+          () => {
+            if (this.app.scene3D) this.app.scene3D.flyToIsland("island-01");
+            this.app.openIslandDrawer("island-01", "textbook");
           },
           "btn btn-primary"
         )

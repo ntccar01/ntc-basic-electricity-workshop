@@ -401,6 +401,7 @@ class ElectricityWorkshopApp {
       const c = this.content.centerIsland;
       badgesEl.innerHTML = `
         <span class="badge">🏛️ ${this.escapeHtml(c.role)}</span>
+        <span class="badge" style="background:#e0f2fe; color:#0369a1; border-color:#0284c7;">${this.escapeHtml(c.routeBadge || "🧭 18週總部")}</span>
         <span class="badge">地標：${this.escapeHtml(c.landmark)}</span>
       `;
       titleEl.textContent = c.name;
@@ -416,6 +417,7 @@ class ElectricityWorkshopApp {
       if (!isl) return;
       badgesEl.innerHTML = `
         <span class="badge">第 ${isl.order} 課</span>
+        <span class="badge" style="background:#ffedd5; color:#c2410c; border-color:#ea580c;">${this.escapeHtml(isl.routeBadge || "")}</span>
         <span class="badge badge-sample">${this.escapeHtml(isl.group)}（示意）</span>
         <span class="badge">地標：${this.escapeHtml(isl.landmark)}</span>
       `;
@@ -536,24 +538,44 @@ class ElectricityWorkshopApp {
       ? `<p><a href="${this.escapeHtml(isl.link)}" target="_blank" rel="noopener noreferrer" class="btn">🔗 開啟課程外部連結</a></p>`
       : "";
 
+    const nextRouteMap = {
+      "island-03": { id: "island-01", label: "🚀 方案A下一站（W2–5）：第 1 課（電荷→電流→電壓→功率）" },
+      "island-01": { id: "island-02", label: "🚀 方案A下一站（W6–8）：第 2 課（電阻色碼→歐姆定律→溫度與焦耳熱）" },
+      "island-02": { id: "island-03", label: "🚀 方案A下一站（W9–11）：回到第 3 課（串聯單一迴路與 KVL）" },
+      "island-04": { id: "island-05", label: "🚀 方案A下一站（W15–16）：第 5 課（電容儲能与電磁感應）" },
+      "island-05": { id: "center-island", label: "🚀 方案A最終站（W17–18）：中央島（跨課總複習與診斷）" }
+    };
+    const nextStation = nextRouteMap[isl.id];
+
     bodyEl.innerHTML = `
       <div class="mascot-tip-box">
-        <div style="font-size:1.8rem;">👓</div>
-        <div class="tip-content">
-          <strong>${this.escapeHtml(this.content.site.mascot.shortName)}導覽：</strong>
-          ${this.escapeHtml(isl.intro)}
+        <div style="font-size:1.8rem;">🧭</div>
+        <div class="tip-content" style="width:100%;">
+          <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px;">
+            <strong>${this.escapeHtml(this.content.site.mascot.shortName)}方案 A 領航：</strong>
+            <span class="badge" style="background:#ffedd5; color:#c2410c; border-color:#ea580c;">${this.escapeHtml(isl.routeBadge || "")}</span>
+          </div>
+          <div style="margin-bottom:8px;">${this.escapeHtml(isl.routeSummary || isl.intro)}</div>
+          <div style="display:flex; flex-wrap:wrap; gap:8px;">
+            <button type="button" class="btn btn-primary" id="btn-top-go-guided">🎯 進入本島課本導讀＆SVG闖關 →</button>
+            ${
+              nextStation
+                ? `<button type="button" class="btn btn-accent" id="btn-next-route-station">${this.escapeHtml(nextStation.label)}</button>`
+                : ""
+            }
+          </div>
         </div>
       </div>
 
       <div class="section-card">
-        <h3>🎯 ${this.escapeHtml(this.content.extraLabel)}</h3>
+        <h3>🎯 ${this.escapeHtml(this.content.extraLabel)}（依方案 A 認知鷹架排序）</h3>
         <ul style="margin:0; padding-left:1.25rem;">
           ${extraLines.map((line) => `<li style="margin-bottom:6px;">${this.escapeHtml(line)}</li>`).join("")}
         </ul>
       </div>
 
       <div class="section-card">
-        <h3>📚 教材內容重點（依課本 CH${isl.order} 改寫）</h3>
+        <h3>📚 教材內容重點（依課本 CH${isl.order} 改寫 · 方案 A 推薦學習順序）</h3>
         ${isl.points.map((pt) => `<div class="point-item">${this.escapeHtml(pt)}</div>`).join("")}
         ${linkHtml}
       </div>
@@ -574,6 +596,20 @@ class ElectricityWorkshopApp {
         </div>
       </div>
     `;
+
+    const topGuidedBtn = bodyEl.querySelector("#btn-top-go-guided");
+    if (topGuidedBtn) {
+      topGuidedBtn.addEventListener("click", () => {
+        this.openIslandDrawer(isl.id, "guidedStudy");
+      });
+    }
+    const nextStationBtn = bodyEl.querySelector("#btn-next-route-station");
+    if (nextStationBtn && nextStation) {
+      nextStationBtn.addEventListener("click", () => {
+        if (this.scene3D) this.scene3D.flyToIsland(nextStation.id);
+        this.openIslandDrawer(nextStation.id, nextStation.id === "center-island" ? "semesterMap" : "textbook");
+      });
+    }
 
     bodyEl.querySelector("#btn-mark-read").addEventListener("click", () => {
       this.state.readCompleted[isl.id] = true;
@@ -1150,11 +1186,12 @@ class ElectricityWorkshopApp {
           <div>
             <div style="display:flex; gap:6px; flex-wrap:wrap;">
               <span class="badge">第 ${isl.order} 課</span>
+              <span class="badge" style="background:#ffedd5; color:#c2410c; border-color:#ea580c;">${this.escapeHtml(isl.routeBadge || "")}</span>
               <span class="badge badge-sample">${this.escapeHtml(isl.group)}（示意）</span>
               <span class="badge">${this.escapeHtml(status)}</span>
             </div>
             <h3>${isl.order}. ${this.escapeHtml(isl.name)}</h3>
-            <p style="margin:4px 0; font-size:0.92rem; color:var(--muted);">${this.escapeHtml(isl.intro)}</p>
+            <p style="margin:4px 0; font-size:0.92rem; color:var(--muted);">${this.escapeHtml(isl.routeSummary || isl.intro)}</p>
           </div>
           <button type="button" class="btn btn-primary" data-open-island="${isl.id}">進入第 ${isl.order} 課內容</button>
         </div>

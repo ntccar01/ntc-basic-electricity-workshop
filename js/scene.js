@@ -98,6 +98,7 @@ export class ArchipelagoScene {
         id: this.content.centerIsland.id,
         order: 0,
         name: this.content.centerIsland.name,
+        routeBadge: this.content.centerIsland.routeBadge || "🧭 W17–18",
         isCenter: true,
         pos: new THREE.Vector3(0, 0, 0),
         labelOffset: new THREE.Vector3(0, 13.5, 0),
@@ -114,6 +115,7 @@ export class ArchipelagoScene {
         id: isl.id,
         order: isl.order,
         name: isl.name,
+        routeBadge: isl.routeBadge || "",
         isCenter: false,
         pos: new THREE.Vector3(x, y, z),
         labelOffset: new THREE.Vector3(0, 10.2, 0),
@@ -131,14 +133,22 @@ export class ArchipelagoScene {
       btn.type = "button";
       btn.className = `island-label ${meta.isCenter ? "center-label" : ""}`;
       btn.dataset.islandId = meta.id;
-      btn.setAttribute("aria-label", meta.isCenter ? `中央島：${meta.name}（總複習與電學知識圖書館）` : `第 ${meta.order} 島：${meta.name}`);
+      btn.setAttribute("aria-label", meta.isCenter ? `中央島：${meta.name}（總複習與電學知識圖書館）` : `第 ${meta.order} 島：${meta.name}（${meta.routeBadge}）`);
 
-      const badgeText = meta.isCenter ? "🏛️ 總複習" : `${meta.order}`;
+      const badgeText = meta.isCenter ? "🏛️ 總複習" : `第${meta.order}課`;
       const statusText = this.getIslandStatus ? this.getIslandStatus(meta.id) : "";
+      const routeHtml = meta.routeBadge
+        ? `<span class="route-pill" style="font-size:0.72rem; font-weight:800; padding:2px 6px; border-radius:999px; background:${
+            meta.id === "island-03" ? "#ffedd5" : "#e0f2fe"
+          }; color:${meta.id === "island-03" ? "#c2410c" : "#0369a1"}; border:1px solid ${
+            meta.id === "island-03" ? "#ea580c" : "#0284c7"
+          };">${meta.routeBadge}</span>`
+        : "";
 
       btn.innerHTML = `
         <span class="num-badge">${badgeText}</span>
         <span class="label-name">${meta.name}</span>
+        ${routeHtml}
         <span class="status-dot" data-status-for="${meta.id}">${statusText}</span>
       `;
 

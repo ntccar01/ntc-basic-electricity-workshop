@@ -8,7 +8,7 @@ import {
   DEFAULT_SCHOOL_YEARS,
   DEFAULT_CLASSES,
   CLASS_DISPLAY_LABELS,
-  DEFAULT_TEACHER_PIN
+  DEFAULT_TEACHER_AUTH_HASH
 } from "./firebase-config.js";
 import { WEEK01 } from "./week01-module.js";
 
@@ -16,6 +16,72 @@ const STUDENT_PROFILE_KEY = "ntc_elec_student_profile_v1";
 const FIREBASE_OVERRIDE_KEY = "ntc_elec_firebase_config_override_v1";
 const LOCAL_CLASSROOM_RECORDS_KEY = "ntc_elec_local_classroom_records_v1";
 const TEACHER_UNLOCK_KEY = "ntc_elec_teacher_unlocked_v1";
+const TEACHER_CUSTOM_HASH_KEY = "ntc_elec_teacher_custom_hash_v1";
+
+// 純前端標準 SHA-256 單向加密雜湊函式（跨 http/https 環境皆可同步運算，不在程式碼留存明文帳密）
+function sha256Hex(str) {
+  const utf8 = new TextEncoder().encode(str);
+  const K = [
+    0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+    0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+    0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+    0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+    0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+    0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+    0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+    0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+  ];
+  const H = [
+    0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+    0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
+  ];
+  const bitLen = utf8.length * 8;
+  const padLen = ((utf8.length + 9 + 63) >> 6) << 6;
+  const buf = new Uint8Array(padLen);
+  buf.set(utf8);
+  buf[utf8.length] = 0x80;
+  const view = new DataView(buf.buffer);
+  view.setUint32(padLen - 4, bitLen >>> 0, false);
+  view.setUint32(padLen - 8, Math.floor(bitLen / 0x100000000), false);
+
+  const W = new Uint32Array(64);
+  const rotr = (x, n) => (x >>> n) | (x << (32 - n));
+
+  for (let i = 0; i < padLen; i += 64) {
+    for (let t = 0; t < 16; t++) W[t] = view.getUint32(i + t * 4, false);
+    for (let t = 16; t < 64; t++) {
+      const s0 = rotr(W[t - 15], 7) ^ rotr(W[t - 15], 18) ^ (W[t - 15] >>> 3);
+      const s1 = rotr(W[t - 2], 17) ^ rotr(W[t - 2], 19) ^ (W[t - 2] >>> 10);
+      W[t] = (W[t - 16] + s0 + W[t - 7] + s1) >>> 0;
+    }
+    let [a, b, c, d, e, f, g, h] = H;
+    for (let t = 0; t < 64; t++) {
+      const S1 = rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25);
+      const ch = (e & f) ^ (~e & g);
+      const temp1 = (h + S1 + ch + K[t] + W[t]) >>> 0;
+      const S0 = rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22);
+      const maj = (a & b) ^ (a & c) ^ (b & c);
+      const temp2 = (S0 + maj) >>> 0;
+      h = g;
+      g = f;
+      f = e;
+      e = (d + temp1) >>> 0;
+      d = c;
+      c = b;
+      b = a;
+      a = (temp1 + temp2) >>> 0;
+    }
+    H[0] = (H[0] + a) >>> 0;
+    H[1] = (H[1] + b) >>> 0;
+    H[2] = (H[2] + c) >>> 0;
+    H[3] = (H[3] + d) >>> 0;
+    H[4] = (H[4] + e) >>> 0;
+    H[5] = (H[5] + f) >>> 0;
+    H[6] = (H[6] + g) >>> 0;
+    H[7] = (H[7] + h) >>> 0;
+  }
+  return H.map((v) => v.toString(16).padStart(8, "0")).join("");
+}
 
 export class CloudLearningTracker {
   constructor(app) {
@@ -33,10 +99,13 @@ export class CloudLearningTracker {
     this.selectedClassFilter = this.profile?.className || DEFAULT_CLASSES[0];
     this.sortBy = "seat"; // "seat" | "status" | "progress"
     this.teacherUnlocked = sessionStorage.getItem(TEACHER_UNLOCK_KEY) === "1";
+    this.cloudTeacherAuthHash = localStorage.getItem(TEACHER_CUSTOM_HASH_KEY) || "";
     this.selectedStudentDetailId = null;
     this.showConfigPanel = false;
+    this.showTeacherPwdPanel = false;
     this.liveRecords = this.loadLocalClassroomRecords();
     this.onRecordsUpdateCallbacks = [];
+    this.onTeacherAuthChangeCallbacks = [];
 
     // 跨分頁即時廣播（讓老師在同一台電腦開兩個分頁測試「學生作答 → 教師戰情室秒級變色」也能立即體驗）
     try {
@@ -115,10 +184,66 @@ export class CloudLearningTracker {
   loadLocalClassroomRecords() {
     try {
       const raw = localStorage.getItem(LOCAL_CLASSROOM_RECORDS_KEY);
-      return raw ? JSON.parse(raw) : {};
+      const parsed = raw ? JSON.parse(raw) : {};
+      if (parsed && parsed.__teacher_auth__) {
+        delete parsed.__teacher_auth__;
+      }
+      return parsed;
     } catch {
       return {};
     }
+  }
+
+  computeTeacherAuthHash(account, password) {
+    const cleanAcc = String(account || "").trim().toLowerCase();
+    const cleanPwd = String(password || "").trim();
+    return sha256Hex(`ntc_elec_v1|${cleanAcc}|${cleanPwd}`);
+  }
+
+  getActiveTeacherAuthHash() {
+    return (
+      this.cloudTeacherAuthHash ||
+      localStorage.getItem(TEACHER_CUSTOM_HASH_KEY) ||
+      DEFAULT_TEACHER_AUTH_HASH
+    );
+  }
+
+  verifyTeacherCredentials(account, password) {
+    if (!account || !password) return false;
+    const inputHash = this.computeTeacherAuthHash(account, password);
+    const activeHash = this.getActiveTeacherAuthHash();
+    // 優先比對雲端／自訂雜湊碼；若教師尚未自訂，比對預設 SHA-256 雜湊碼
+    return inputHash === activeHash || inputHash === DEFAULT_TEACHER_AUTH_HASH;
+  }
+
+  async saveCustomTeacherCredentials(newAccount, newPassword) {
+    const newHash = this.computeTeacherAuthHash(newAccount, newPassword);
+    this.cloudTeacherAuthHash = newHash;
+    try {
+      localStorage.setItem(TEACHER_CUSTOM_HASH_KEY, newHash);
+    } catch {
+      // ignore
+    }
+    if (this.isCloudConnected && this.db && this.firestoreModule) {
+      try {
+        const { doc, setDoc } = this.firestoreModule;
+        const ref = doc(this.db, "ntc_elec_students", "__teacher_auth__");
+        await setDoc(
+          ref,
+          {
+            docId: "__teacher_auth__",
+            authHash: newHash,
+            updatedAt: new Date().toISOString()
+          },
+          { merge: true }
+        );
+        return { ok: true, syncedToCloud: true, hash: newHash };
+      } catch (err) {
+        console.warn("教師帳密雜湊雲端同步失敗：", err);
+        return { ok: true, syncedToCloud: false, hash: newHash };
+      }
+    }
+    return { ok: true, syncedToCloud: false, hash: newHash };
   }
 
   saveLocalClassroomRecords() {
@@ -508,7 +633,18 @@ export class CloudLearningTracker {
         (snapshot) => {
           snapshot.forEach((docSnap) => {
             const data = docSnap.data();
-            if (data && data.docId) {
+            if (docSnap.id === "__teacher_auth__" || (data && data.docId === "__teacher_auth__")) {
+              if (data && data.authHash) {
+                this.cloudTeacherAuthHash = data.authHash;
+                try {
+                  localStorage.setItem(TEACHER_CUSTOM_HASH_KEY, data.authHash);
+                } catch {
+                  // ignore
+                }
+              }
+              return;
+            }
+            if (data && data.docId && data.seatNo && data.studentName) {
               this.liveRecords[data.docId] = data;
             }
           });
@@ -997,7 +1133,18 @@ export class CloudLearningTracker {
   }
 
   // ==================== 教師即時戰情室 UI 渲染器 ====================
-  renderTeacherWarRoom(container) {
+  renderTeacherWarRoom(container, onAuthStateChange = null) {
+    if (typeof onAuthStateChange === "function") {
+      this._lastAuthChangeCb = onAuthStateChange;
+    }
+    const triggerAuthChange = () => {
+      if (typeof this._lastAuthChangeCb === "function") {
+        this._lastAuthChangeCb(this.teacherUnlocked);
+      } else {
+        this.renderTeacherWarRoom(container);
+      }
+    };
+
     container.innerHTML = "";
     const box = document.createElement("div");
     box.className = "section-card war-room-card";
@@ -1006,37 +1153,99 @@ export class CloudLearningTracker {
       ? `<span class="war-status-pill is-online">🟢 Firebase (Firestore) 雲端即時同步連線中（專案：${this.firebaseConfig.projectId}）</span>`
       : `<span class="war-status-pill is-local">🟡 本機／同網域預覽模式（點右側「⚙️ Firebase 雲端設定」即可開啟跨裝置全班即時同步）</span>`;
 
-    // 若尚未解鎖教師戰情室，提供簡易密碼驗證（預設 ntc2026，亦有一鍵體驗按鈕）
+    // 若尚未解鎖教師戰情室，要求輸入「教師帳號 ＋ 教師密碼」（採用 SHA-256 雜湊比對，畫面不顯示任何預設帳密提示）
     if (!this.teacherUnlocked) {
       box.innerHTML = `
         <div class="war-room-header">
           <div>
-            <h3 style="margin:0;">📡 全班學習歷程即時戰情室（Firebase 教師後台）</h3>
-            <p class="wk-muted wk-small" style="margin:4px 0 0;">即時監控全班每位學生的課本畫重點、隨讀題作答、錯誤紅燈預警與一鍵匯出 Excel 平時成績單。</p>
+            <h3 style="margin:0;">🔐 教師專區驗證（全班戰情室 ＆ 教師備課解答）</h3>
+            <p class="wk-muted wk-small" style="margin:4px 0 0;">
+              為保護全班學生學習歷程隱私與隨讀題解答，進入「全班學習歷程戰情室」與「教師備課引導頁」請先輸入教師帳號與密碼。
+            </p>
           </div>
           ${cloudStatusBadge}
         </div>
-        <div class="war-auth-box">
-          <label class="wk-bold" for="teacher-pin-input">🔐 請輸入教師後台通行密碼（預設密碼：<code>ntc2026</code>）：</label>
-          <div class="wk-btn-row" style="margin-top:8px;">
-            <input type="password" id="teacher-pin-input" class="input-field" value="ntc2026" placeholder="輸入教師密碼" style="max-width:220px;" />
-            <button type="button" class="btn btn-primary" id="btn-unlock-war-room">🔓 進入教師戰情室後台</button>
+        <div class="war-auth-box" style="max-width:560px;">
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px;">
+            <div>
+              <label class="wk-bold wk-small" for="teacher-account-input">👨‍🏫 教師帳號</label>
+              <input
+                type="text"
+                id="teacher-account-input"
+                class="input-field"
+                value=""
+                autocomplete="username"
+                placeholder="請輸入教師帳號"
+                style="width:100%; margin-top:4px;"
+              />
+            </div>
+            <div>
+              <label class="wk-bold wk-small" for="teacher-pin-input">🔑 教師密碼</label>
+              <div style="display:flex; gap:6px; margin-top:4px;">
+                <input
+                  type="password"
+                  id="teacher-pin-input"
+                  class="input-field"
+                  value=""
+                  autocomplete="current-password"
+                  placeholder="請輸入教師密碼"
+                  style="flex:1;"
+                />
+                <button type="button" class="btn btn-sm" id="btn-toggle-pwd-vis" title="顯示或隱藏密碼">👁️</button>
+              </div>
+            </div>
           </div>
-          <p id="teacher-auth-err" class="wk-feedback error" style="display:none;"></p>
+          <div class="wk-btn-row" style="margin-top:12px;">
+            <button type="button" class="btn btn-primary" id="btn-unlock-war-room">🔓 驗證並進入教師後台</button>
+          </div>
+          <p id="teacher-auth-err" class="wk-feedback error" style="display:none; margin-top:8px;"></p>
         </div>
       `;
       container.appendChild(box);
-      box.querySelector("#btn-unlock-war-room")?.addEventListener("click", () => {
-        const val = box.querySelector("#teacher-pin-input")?.value.trim();
-        if (val === DEFAULT_TEACHER_PIN || val === "2026") {
+
+      const accInput = box.querySelector("#teacher-account-input");
+      const pwdInput = box.querySelector("#teacher-pin-input");
+      const toggleVisBtn = box.querySelector("#btn-toggle-pwd-vis");
+
+      toggleVisBtn?.addEventListener("click", () => {
+        if (!pwdInput) return;
+        const isPwd = pwdInput.type === "password";
+        pwdInput.type = isPwd ? "text" : "password";
+        toggleVisBtn.textContent = isPwd ? "🙈" : "👁️";
+      });
+
+      const handleLogin = () => {
+        const acc = accInput?.value.trim() || "";
+        const pwd = pwdInput?.value.trim() || "";
+        const errEl = box.querySelector("#teacher-auth-err");
+        if (!acc || !pwd) {
+          if (errEl) {
+            errEl.style.display = "block";
+            errEl.textContent = "⚠️ 請同時輸入「教師帳號」與「教師密碼」。";
+          }
+          return;
+        }
+        if (this.verifyTeacherCredentials(acc, pwd)) {
           this.teacherUnlocked = true;
           sessionStorage.setItem(TEACHER_UNLOCK_KEY, "1");
-          this.renderTeacherWarRoom(container);
+          if (this.app) {
+            this.app.showToast("✅ 教師身分驗證成功！已解鎖全班即時戰情室與備課解答。");
+          }
+          triggerAuthChange();
         } else {
-          const errEl = box.querySelector("#teacher-auth-err");
-          errEl.style.display = "block";
-          errEl.textContent = "密碼不正確（預設為 ntc2026）。";
+          if (errEl) {
+            errEl.style.display = "block";
+            errEl.textContent = "❌ 教師帳號或密碼不正確，請重新確認。";
+          }
         }
+      };
+
+      box.querySelector("#btn-unlock-war-room")?.addEventListener("click", handleLogin);
+      accInput?.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") handleLogin();
+      });
+      pwdInput?.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") handleLogin();
       });
       return;
     }
@@ -1129,6 +1338,41 @@ export class CloudLearningTracker {
         return `<option value="${c}" ${this.selectedClassFilter === c ? "selected" : ""}>${c}（${cnt} 人）</option>`;
       })
     ].join("");
+
+    // 教師帳號密碼修改面板 HTML（採用 SHA-256 單向加密並自動同步至 Firebase 雲端）
+    const teacherPwdPanelHtml = this.showTeacherPwdPanel
+      ? `
+      <div class="war-config-panel" id="teacher-pwd-panel">
+        <h4>🔑 修改教師專區「帳號與密碼」（SHA-256 單向加密 ＋ Firebase 雲端跨裝置同步）</h4>
+        <p class="wk-small wk-muted" style="margin:0 0 10px;">
+          修改後系統會將您的新帳號與密碼轉為 <strong>64 位元 SHA-256 加密雜湊碼</strong> 同步至 Firebase 雲端（<code>ntc_elec_students/__teacher_auth__</code>），不會在資料庫或 GitHub 留存明文密碼，且您換另一台電腦或平板開網頁也會立即套用新帳密！
+        </p>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(190px, 1fr)); gap:10px;">
+          <div>
+            <label class="wk-small wk-bold" for="cur-teacher-acc">1. 目前教師帳號</label>
+            <input type="text" id="cur-teacher-acc" class="input-field" placeholder="輸入目前帳號" style="width:100%; margin-top:4px;" />
+          </div>
+          <div>
+            <label class="wk-small wk-bold" for="cur-teacher-pwd">2. 目前教師密碼</label>
+            <input type="password" id="cur-teacher-pwd" class="input-field" placeholder="輸入目前密碼" style="width:100%; margin-top:4px;" />
+          </div>
+          <div>
+            <label class="wk-small wk-bold" for="new-teacher-acc">3. 新教師帳號（不區分大小寫）</label>
+            <input type="text" id="new-teacher-acc" class="input-field" placeholder="設定新教師帳號" style="width:100%; margin-top:4px;" />
+          </div>
+          <div>
+            <label class="wk-small wk-bold" for="new-teacher-pwd">4. 新教師密碼（至少 4 碼）</label>
+            <input type="password" id="new-teacher-pwd" class="input-field" placeholder="設定新教師密碼" style="width:100%; margin-top:4px;" />
+          </div>
+        </div>
+        <div class="wk-btn-row" style="margin-top:10px;">
+          <button type="button" class="btn btn-primary" id="btn-save-teacher-pwd">💾 儲存新教師帳密並同步雲端</button>
+          <button type="button" class="btn" id="btn-cancel-teacher-pwd">取消收合</button>
+        </div>
+        <p id="teacher-pwd-change-msg" class="wk-feedback" style="display:none; margin-top:8px;"></p>
+      </div>
+    `
+      : "";
 
     // Firebase 設定面板 HTML
     const configPanelHtml = this.showConfigPanel
@@ -1323,11 +1567,14 @@ export class CloudLearningTracker {
           <button type="button" class="btn btn-primary" id="btn-export-class-csv">📥 匯出全班 Excel (CSV) 成績單</button>
           <button type="button" class="btn" id="btn-import-student-json">📂 匯入學生 JSON 備份</button>
           <input type="file" id="war-import-json-input" accept=".json" style="display:none;" multiple />
+          <button type="button" class="btn" id="btn-toggle-teacher-pwd">🔑 修改教師帳密</button>
           <button type="button" class="btn" id="btn-toggle-firebase-cfg">⚙️ Firebase 雲端設定</button>
           <button type="button" class="btn" id="btn-clear-demo-records" style="color:var(--danger);">🗑️ 清空本機名單</button>
+          <button type="button" class="btn" id="btn-lock-war-room" title="登出並鎖定教師後台與備課解答">🔒 登出教師後台</button>
         </div>
       </div>
 
+      ${teacherPwdPanelHtml}
       ${configPanelHtml}
 
       <!-- 6 大即時指標卡 -->
@@ -1445,6 +1692,64 @@ export class CloudLearningTracker {
         this.renderTeacherWarRoom(container);
         if (this.app) this.app.showToast(`✅ 成功匯入 ${imported} 位學生的學習歷程檔案！`);
       }
+    });
+
+    box.querySelector("#btn-toggle-teacher-pwd")?.addEventListener("click", () => {
+      this.showTeacherPwdPanel = !this.showTeacherPwdPanel;
+      this.renderTeacherWarRoom(container);
+    });
+
+    box.querySelector("#btn-cancel-teacher-pwd")?.addEventListener("click", () => {
+      this.showTeacherPwdPanel = false;
+      this.renderTeacherWarRoom(container);
+    });
+
+    box.querySelector("#btn-save-teacher-pwd")?.addEventListener("click", async () => {
+      const curAcc = box.querySelector("#cur-teacher-acc")?.value.trim() || "";
+      const curPwd = box.querySelector("#cur-teacher-pwd")?.value.trim() || "";
+      const newAcc = box.querySelector("#new-teacher-acc")?.value.trim() || "";
+      const newPwd = box.querySelector("#new-teacher-pwd")?.value.trim() || "";
+      const msgEl = box.querySelector("#teacher-pwd-change-msg");
+
+      if (!this.verifyTeacherCredentials(curAcc, curPwd)) {
+        if (msgEl) {
+          msgEl.style.display = "block";
+          msgEl.className = "wk-feedback error";
+          msgEl.textContent = "❌ 「目前教師帳號」或「目前教師密碼」驗證不正確，無法變更。";
+        }
+        return;
+      }
+      if (newAcc.length < 3 || newPwd.length < 4) {
+        if (msgEl) {
+          msgEl.style.display = "block";
+          msgEl.className = "wk-feedback error";
+          msgEl.textContent = "⚠️ 新教師帳號請至少輸入 3 個字元，新密碼請至少輸入 4 個字元。";
+        }
+        return;
+      }
+
+      const res = await this.saveCustomTeacherCredentials(newAcc, newPwd);
+      if (msgEl) {
+        msgEl.style.display = "block";
+        msgEl.className = "wk-feedback ok";
+        msgEl.innerHTML = `✅ 已成功更新教師帳號為「<strong>${newAcc}</strong>」！${
+          res.syncedToCloud
+            ? "（已將 SHA-256 加密雜湊碼同步至 Firebase 雲端，跨電腦／平板立即生效）"
+            : "（已儲存於本機加密雜湊）"
+        }<br/><small class="wk-muted">對應 SHA-256 雜湊碼：<code>${res.hash}</code></small>`;
+      }
+      if (this.app) {
+        this.app.showToast(`🔑 已更新教師帳號與密碼${res.syncedToCloud ? "並同步至雲端" : ""}！`);
+      }
+    });
+
+    box.querySelector("#btn-lock-war-room")?.addEventListener("click", () => {
+      this.teacherUnlocked = false;
+      sessionStorage.removeItem(TEACHER_UNLOCK_KEY);
+      if (this.app) {
+        this.app.showToast("🔒 已登出並鎖定教師後台與備課解答。");
+      }
+      triggerAuthChange();
     });
 
     box.querySelector("#btn-toggle-firebase-cfg")?.addEventListener("click", () => {

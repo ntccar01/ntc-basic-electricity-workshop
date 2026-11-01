@@ -2281,12 +2281,22 @@ export class GuidedStudyController {
     const savedScroll = container.scrollTop;
     container.innerHTML = "";
     const wrap = this.node("div", "wk-container");
+    const rerenderOnAuth = () => this.renderTeacherGuidedTab(container, islandId);
+
+    // 🔐 教師專區門禁：未通過教師帳號密碼驗證前，只顯示登入框（備課解答、戰情室皆不顯示）
+    if (this.app && this.app.cloudTracker && !this.app.cloudTracker.teacherUnlocked) {
+      const authMount = this.node("div", "wk-war-room-mount");
+      this.app.cloudTracker.renderTeacherWarRoom(authMount, rerenderOnAuth);
+      wrap.appendChild(authMount);
+      container.appendChild(wrap);
+      return;
+    }
 
     if (islandId !== "island-03" && !this.ui.previewWeek01OnOtherIsland) {
       this.renderPlannedIslandOverview(wrap, islandId, "teacher");
       if (this.app && this.app.cloudTracker) {
         const warRoomMount = this.node("div", "wk-war-room-mount");
-        this.app.cloudTracker.renderTeacherWarRoom(warRoomMount);
+        this.app.cloudTracker.renderTeacherWarRoom(warRoomMount, rerenderOnAuth);
         wrap.appendChild(warRoomMount);
       }
       container.appendChild(wrap);
@@ -2351,7 +2361,7 @@ export class GuidedStudyController {
     // 📡 全班學習歷程即時戰情室（Firebase 雲端教師後台）
     if (this.app && this.app.cloudTracker) {
       const warRoomMount = this.node("div", "wk-war-room-mount");
-      this.app.cloudTracker.renderTeacherWarRoom(warRoomMount);
+      this.app.cloudTracker.renderTeacherWarRoom(warRoomMount, rerenderOnAuth);
       wrap.appendChild(warRoomMount);
     }
 

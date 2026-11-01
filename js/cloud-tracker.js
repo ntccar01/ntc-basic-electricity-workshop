@@ -7,6 +7,7 @@ import {
   CURRENT_SCHOOL_YEAR,
   DEFAULT_SCHOOL_YEARS,
   DEFAULT_CLASSES,
+  CLASS_DISPLAY_LABELS,
   DEFAULT_TEACHER_PIN
 } from "./firebase-config.js";
 import { WEEK01 } from "./week01-module.js";
@@ -61,6 +62,9 @@ export class CloudLearningTracker {
       const p = JSON.parse(raw);
       if (p && p.className && p.seatNo && p.studentName) {
         p.schoolYear = p.schoolYear || CURRENT_SCHOOL_YEAR;
+        if (!DEFAULT_CLASSES.includes(p.className)) {
+          p.className = "汽車二";
+        }
         return p;
       }
       return null;
@@ -567,10 +571,10 @@ export class CloudLearningTracker {
     };
 
     const yearOptions = DEFAULT_SCHOOL_YEARS.map(
-      (y) => `<option value="${y}" ${(p.schoolYear || CURRENT_SCHOOL_YEAR) === y ? "selected" : ""}>${y}</option>`
+      (y) => `<option value="${y}" ${(p.schoolYear || CURRENT_SCHOOL_YEAR) === y ? "selected" : ""}>${y}${y === CURRENT_SCHOOL_YEAR ? "（本學年度預設）" : ""}</option>`
     ).join("");
     const classOptions = DEFAULT_CLASSES.map(
-      (c) => `<option value="${c}" ${p.className === c ? "selected" : ""}>${c}</option>`
+      (c) => `<option value="${c}" ${p.className === c ? "selected" : ""}>${CLASS_DISPLAY_LABELS[c] || c}</option>`
     ).join("");
     const seatOptions = Array.from({ length: 45 }, (_, i) => {
       const s = String(i + 1).padStart(2, "0");
@@ -604,11 +608,11 @@ export class CloudLearningTracker {
     const html = `
       <div class="student-login-modal">
         <div style="margin-bottom:10px;">${cloudBadge}</div>
-        <p style="margin-top:0;">請輸入你的<strong>學年度、班級、座號、姓名與 4 碼個人通行碼（PIN）</strong>。系統會以「學年度＋班級＋座號」獨立建檔，跨年度同班名（如不同屆的汽車二甲）資料完全獨立不混淆！</p>
+        <p style="margin-top:0;">系統已為你預設鎖定<strong>「${CURRENT_SCHOOL_YEAR} · 汽車二」</strong>（跨學年度同班名皆獨立建檔不混淆）。你只需選擇<strong>座號</strong>、輸入<strong>姓名與 4 碼個人通行碼（PIN）</strong>即可開始！</p>
 
         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:12px;">
           <div>
-            <label class="wk-bold wk-small" for="login-year-select">1. 學年度</label>
+            <label class="wk-bold wk-small" for="login-year-select">1. 學年度（預設 115學年度）</label>
             <div style="display:flex; gap:6px; margin-top:4px;">
               <select id="login-year-select" class="input-field" style="flex:1;">
                 ${yearOptions}
@@ -619,13 +623,11 @@ export class CloudLearningTracker {
           </div>
 
           <div>
-            <label class="wk-bold wk-small" for="login-class-select">2. 選擇或輸入班級</label>
+            <label class="wk-bold wk-small" for="login-class-select">2. 修課班級（預設汽車二）</label>
             <div style="display:flex; gap:6px; margin-top:4px;">
               <select id="login-class-select" class="input-field" style="flex:1;">
                 ${classOptions}
-                <option value="__custom__">其他班級（手動輸入）</option>
               </select>
-              <input type="text" id="login-class-custom" class="input-field" placeholder="自訂班級名稱" style="flex:1; display:none;" />
             </div>
           </div>
 
@@ -686,21 +688,11 @@ export class CloudLearningTracker {
     });
 
     const classSelect = document.getElementById("login-class-select");
-    const classCustom = document.getElementById("login-class-custom");
-    if (p.className && !DEFAULT_CLASSES.includes(p.className)) {
-      classSelect.value = "__custom__";
-      classCustom.style.display = "block";
-      classCustom.value = p.className;
-    }
-    classSelect?.addEventListener("change", () => {
-      classCustom.style.display = classSelect.value === "__custom__" ? "block" : "none";
-    });
 
     document.getElementById("btn-confirm-student-login")?.addEventListener("click", async () => {
       const schoolYear =
         yearSelect.value === "__custom__" ? yearCustom.value.trim() : yearSelect.value;
-      const className =
-        classSelect.value === "__custom__" ? classCustom.value.trim() : classSelect.value;
+      const className = classSelect.value;
       const seatNo = document.getElementById("login-seat-select").value;
       const studentName = document.getElementById("login-student-name").value.trim();
       const pinCode = document.getElementById("login-student-pin").value.trim();
@@ -777,7 +769,7 @@ export class CloudLearningTracker {
   }
 
   // 產生 15 位模擬班級學生資料（供老師在尚未填入 Firebase 金鑰前，立即體驗全班紅綠燈戰情室與 CSV 匯出）
-  seedDemoClassroomData(targetYear = CURRENT_SCHOOL_YEAR, targetClass = "汽車一甲") {
+  seedDemoClassroomData(targetYear = CURRENT_SCHOOL_YEAR, targetClass = "汽車二") {
     const sampleNames = [
       "陳冠宇", "林承翰", "黃柏諺", "張家豪", "李宥廷",
       "王品睿", "吳宇翔", "劉子軒", "蔡承恩", "楊宗翰",
@@ -1403,7 +1395,7 @@ export class CloudLearningTracker {
 
     box.querySelector("#btn-seed-demo-class")?.addEventListener("click", () => {
       const targetYr = this.selectedYearFilter === "ALL" ? CURRENT_SCHOOL_YEAR : this.selectedYearFilter;
-      const targetCls = this.selectedClassFilter === "ALL" ? "汽車一甲" : this.selectedClassFilter;
+      const targetCls = this.selectedClassFilter === "ALL" ? "汽車二" : this.selectedClassFilter;
       this.seedDemoClassroomData(targetYr, targetCls);
       this.selectedYearFilter = targetYr;
       this.selectedClassFilter = targetCls;

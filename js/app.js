@@ -568,8 +568,8 @@ class ElectricityWorkshopApp {
       "island-03": { id: "island-01", label: "🚀 方案A下一站（W2–5）：第 1 課（電荷→電流→電壓→功率）" },
       "island-01": { id: "island-02", label: "🚀 方案A下一站（W6–8）：第 2 課（電阻色碼→歐姆定律→溫度與焦耳熱）" },
       "island-02": { id: "island-03", label: "🚀 方案A下一站（W9–11）：回到第 3 課（串聯單一迴路與 KVL）" },
-      "island-04": { id: "island-05", label: "🚀 方案A下一站（W15–16）：第 5 課（電容儲能与電磁感應）" },
-      "island-05": { id: "center-island", label: "🚀 方案A最終站（W17–18）：中央島（跨課總複習與診斷）" }
+      "island-04": { id: "island-05", label: "🚀 方案A下一站（W15–17）：第 5 課（電容、電場與電磁）" },
+      "island-05": { id: "center-island", label: "🚀 方案A最終站（W18）：中央島（跨課總複習與診斷）" }
     };
     const nextStation = nextRouteMap[isl.id];
 

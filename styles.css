@@ -2125,3 +2125,89 @@ html[data-reduced-motion="true"] *::after {
     flex: 1 1 8em;
   }
 }
+
+/* ==================== 頂部單列＋底部工具列不出現捲軸（2026-11-07 調整） ==================== */
+.lbl-short,
+.lbl-narrow {
+  display: none;
+}
+
+@media (min-width: 901px) {
+  #top-bar {
+    flex-wrap: nowrap;
+  }
+  .brand-card {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+  .brand-text {
+    min-width: 0;
+  }
+  .brand-text h1,
+  .brand-text p {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .top-controls {
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+  }
+  .dock-inner {
+    overflow-x: visible;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+/* 中等寬度（含 150% 縮放的筆電）：按鈕改成精簡文字 */
+@media (min-width: 901px) and (max-width: 1440px) {
+  .top-controls {
+    gap: 6px;
+    padding: 6px 10px;
+  }
+  .top-controls .btn,
+  .theme-btn {
+    padding: 0.4rem 0.7rem;
+  }
+  .lbl-mid,
+  .sync-tag {
+    display: none;
+  }
+  .lbl-wide {
+    display: none;
+  }
+  .lbl-narrow {
+    display: inline;
+  }
+  .dock-inner .btn {
+    padding: 0.55rem 0.85rem;
+  }
+  .search-box input {
+    width: 120px;
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1180px) {
+  .theme-name {
+    display: none;
+  }
+  .lbl-long {
+    display: none;
+  }
+  .lbl-short {
+    display: inline;
+  }
+  .brand-text p {
+    max-width: 230px;
+  }
+}
+
+/* 平板（601–900px）：底部列允許換行，不出現橫向捲軸 */
+@media (min-width: 601px) and (max-width: 900px) {
+  .dock-inner {
+    flex-wrap: wrap;
+    justify-content: center;
+    overflow-x: visible;
+  }
+}

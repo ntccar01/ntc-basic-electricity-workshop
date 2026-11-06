@@ -793,7 +793,7 @@ export class CloudLearningTracker {
         ? "本機備份(雲端異常)"
         : "本機已記錄";
     const yr = this.profile.schoolYear || CURRENT_SCHOOL_YEAR;
-    btn.innerHTML = `${statusIcon} <span>${yr} ${this.profile.className} ${this.profile.seatNo}號 ${this.profile.studentName}</span> <small class="sync-tag">${statusLabel}</small>`;
+    btn.innerHTML = `${statusIcon} <span>${this.profile.className} ${this.profile.seatNo}號 ${this.profile.studentName}</span> <small class="sync-tag">${statusLabel}</small>`;
     btn.className = "btn btn-student-pill is-logged-in";
     btn.title = `目前登入：${yr} ${this.profile.className} ${this.profile.seatNo}號 ${this.profile.studentName}（${statusLabel}，點此切換或檢視個人歷程）`;
   }

@@ -58,18 +58,18 @@
     <div class="top-controls" role="toolbar" aria-label="主題與環境控制">
       <div class="theme-switcher" role="group" aria-label="三組底色切換">
         <button type="button" class="theme-btn active" data-theme-opt="sunset" aria-pressed="true">
-          <span class="swatch" style="background:#fbefe3;"></span>夕陽
+          <span class="swatch" style="background:#fbefe3;"></span><span class="theme-name">夕陽</span>
         </button>
         <button type="button" class="theme-btn" data-theme-opt="beach" aria-pressed="false">
-          <span class="swatch" style="background:#f6ead2;"></span>沙灘
+          <span class="swatch" style="background:#f6ead2;"></span><span class="theme-name">沙灘</span>
         </button>
         <button type="button" class="theme-btn" data-theme-opt="dusk" aria-pressed="false">
-          <span class="swatch" style="background:#2b1e1a;"></span>暮色
+          <span class="swatch" style="background:#2b1e1a;"></span><span class="theme-name">暮色</span>
         </button>
       </div>
 
       <button type="button" class="btn" id="btn-daynight" title="切換 3D 光線：白天／黃昏／夜晚">
-        <span id="daynight-icon">☀️</span> <span id="daynight-label">白天光線</span>
+        <span id="daynight-icon">☀️</span> <span id="daynight-label" class="lbl-mid">白天光線</span>
       </button>
 
       <button type="button" class="btn btn-student-pill" id="btn-student-login" title="點此輸入班級、座號、姓名，自動記錄並同步學習歷程">
@@ -77,7 +77,7 @@
       </button>
 
       <button type="button" class="btn" id="btn-daily-key" title="使用每日鑰匙開啟電學寶箱收集圖鑑卡">
-        🔑 每日鑰匙 <span id="daily-key-count">3/3</span>
+        🔑 <span class="lbl-mid">每日鑰匙</span> <span id="daily-key-count">3/3</span>
       </button>
 
       <div class="status-pill" id="clock-pill" aria-live="polite" title="即時時鐘與目前天色">
@@ -133,16 +133,16 @@
     <div class="dock-inner">
       <div class="search-box" role="search">
         <input type="search" id="search-input" placeholder="搜尋島嶼／公式…" aria-label="搜尋島嶼與電學內容" />
-        <button type="button" class="btn btn-primary" id="btn-search" aria-label="執行搜尋">🔍 搜尋</button>
+        <button type="button" class="btn btn-primary" id="btn-search" aria-label="執行搜尋">🔍 <span class="lbl-mid">搜尋</span></button>
       </div>
 
-      <button type="button" class="btn" id="btn-list">📋 地點清單</button>
-      <button type="button" class="btn btn-primary" id="btn-week01">🎯 第 1 週導讀</button>
-      <button type="button" class="btn btn-accent" id="btn-semester-map">🗓️ 18 週地圖</button>
-      <button type="button" class="btn btn-accent" id="btn-center-island">🏛️ 圖書館＆總複習</button>
-      <button type="button" class="btn" id="btn-guide">👓 泓哥問答</button>
+      <button type="button" class="btn" id="btn-list">📋 <span class="lbl-long">地點清單</span><span class="lbl-short">清單</span></button>
+      <button type="button" class="btn btn-primary" id="btn-week01">🎯 <span class="lbl-long">第 1 週導讀</span><span class="lbl-short">第1週</span></button>
+      <button type="button" class="btn btn-accent" id="btn-semester-map">🗓️ <span class="lbl-long">18 週地圖</span><span class="lbl-short">地圖</span></button>
+      <button type="button" class="btn btn-accent" id="btn-center-island">🏛️ <span class="lbl-wide">圖書館＆總複習</span><span class="lbl-narrow">總複習</span></button>
+      <button type="button" class="btn" id="btn-guide">👓 <span class="lbl-wide">泓哥問答</span><span class="lbl-narrow">問答</span></button>
       <button type="button" class="btn" id="btn-collection">🃏 圖鑑 <span id="collection-badge">0/12</span></button>
-      <button type="button" class="btn" id="btn-more-tools" aria-expanded="false">🧰 更多工具 ▾</button>
+      <button type="button" class="btn" id="btn-more-tools" aria-expanded="false">🧰 <span class="lbl-wide">更多工具</span><span class="lbl-narrow">更多</span> ▾</button>
     </div>
   </nav>
 

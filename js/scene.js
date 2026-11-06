@@ -98,7 +98,7 @@ export class ArchipelagoScene {
         id: this.content.centerIsland.id,
         order: 0,
         name: this.content.centerIsland.name,
-        routeBadge: this.content.centerIsland.routeBadge || "🧭 W17–18",
+        routeBadge: this.content.centerIsland.routeBadge || "🧭 W18",
         isCenter: true,
         pos: new THREE.Vector3(0, 0, 0),
         labelOffset: new THREE.Vector3(0, 13.5, 0),

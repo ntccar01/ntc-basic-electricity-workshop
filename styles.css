@@ -1949,3 +1949,179 @@ html[data-reduced-motion="true"] *::after {
   padding: 4px 10px;
   font-size: 0.82rem;
 }
+
+/* ==================== 第 2 週新增：多週切換、實驗台與 6 種新題型 ==================== */
+.wk-week-switch {
+  align-items: center;
+}
+.wk-lab .wk-sim-art svg,
+.wk-hotspot svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 14px;
+}
+.wk-conf-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+.wk-conf-btn {
+  min-height: 44px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 2px dashed var(--line);
+  background: var(--surface-solid);
+  color: var(--ink);
+  font-weight: 700;
+  cursor: pointer;
+}
+.wk-conf-btn.selected {
+  border-style: solid;
+  border-color: #7c3aed;
+  background: rgba(124, 58, 237, 0.12);
+}
+.wk-numeric-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.wk-num-input,
+.wk-unit-select,
+.wk-cloze-select {
+  min-height: 48px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 2px solid var(--line);
+  background: var(--surface-solid);
+  color: var(--ink);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+.wk-num-input {
+  width: 9.5em;
+  max-width: 100%;
+}
+.wk-exp-input {
+  width: 5em;
+}
+.wk-num-input:focus,
+.wk-unit-select:focus,
+.wk-cloze-select:focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 1px;
+}
+.wk-cloze {
+  line-height: 2.6;
+  font-size: 1.05rem;
+}
+.wk-cloze-blank {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 4px;
+}
+.wk-cloze-select {
+  min-height: 44px;
+  padding: 4px 8px;
+  border-color: var(--accent);
+}
+.wk-step-row {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-solid);
+}
+.wk-step-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.wk-step-mark {
+  display: inline-block;
+  min-width: 1.2em;
+  font-weight: 900;
+}
+.wk-step-mark.ok {
+  color: var(--success);
+}
+.wk-step-mark.bad {
+  color: var(--danger);
+}
+.wk-hotspot {
+  margin-top: 8px;
+  border-radius: 14px;
+  overflow: hidden;
+}
+.wk-hotspot [data-hot] {
+  cursor: pointer;
+  outline: none;
+}
+.wk-hotspot [data-hot] .hot-ring {
+  transition: stroke 0.15s;
+}
+.wk-hotspot [data-hot]:hover .hot-ring,
+.wk-hotspot [data-hot]:focus .hot-ring {
+  stroke: rgba(47, 143, 131, 0.25);
+}
+.wk-hotspot [data-hot].is-selected .hot-ring {
+  stroke: rgba(234, 88, 12, 0.35);
+}
+.wk-hotspot [data-hot]:hover .hot-box,
+.wk-hotspot [data-hot]:focus .hot-box {
+  stroke: #2f8f83;
+  stroke-width: 4;
+}
+.wk-hotspot [data-hot].is-selected .hot-box {
+  stroke: #ea580c;
+  stroke-width: 5;
+}
+.wk-poe-step {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-left: 4px solid var(--accent);
+  background: var(--surface-solid);
+  border-radius: 0 12px 12px 0;
+}
+.wk-spot-lines {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0;
+}
+.wk-spot-line {
+  min-height: 48px;
+  text-align: left;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 2px solid var(--line);
+  background: #fffdf8;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.wk-spot-line.selected {
+  border-color: var(--danger);
+  background: rgba(185, 43, 39, 0.08);
+  text-decoration: underline wavy var(--danger);
+}
+.war-surewrong-box {
+  border-color: #c4b5fd;
+}
+@media (max-width: 600px) {
+  .wk-num-input {
+    width: 100%;
+  }
+  .wk-exp-input {
+    width: 6em;
+  }
+  .wk-unit-select {
+    flex: 1 1 8em;
+  }
+}

@@ -359,6 +359,11 @@ class ElectricityWorkshopApp {
     const btnWeek01 = document.getElementById("btn-week01");
     if (btnWeek01) {
       btnWeek01.addEventListener("click", () => {
+        if (this.guidedStudy) {
+          this.guidedStudy.weekNo = 1;
+          this.guidedStudy.lessonNo = 1;
+          this.guidedStudy.resetLessonUi();
+        }
         if (this.scene3D) this.scene3D.flyToIsland("island-03");
         this.openIslandDrawer("island-03", "guidedStudy");
       });

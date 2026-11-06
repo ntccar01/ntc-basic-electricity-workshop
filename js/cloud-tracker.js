@@ -10,7 +10,7 @@ import {
   CLASS_DISPLAY_LABELS,
   TEACHER_EMAILS
 } from "./firebase-config.js";
-import { WEEK01 } from "./week01-module.js";
+import { WEEK01, WEEKS } from "./week01-module.js";
 
 const STUDENT_PROFILE_KEY = "ntc_elec_student_profile_v1";
 const FIREBASE_OVERRIDE_KEY = "ntc_elec_firebase_config_override_v1";
@@ -382,34 +382,40 @@ export class CloudLearningTracker {
   // 建立全班題目 ID 對照字典（供教師迷思分析與學生個人歷程顯示）
   getQuestionCatalog() {
     const map = {};
-    [1, 2].forEach((lessonNo) => {
-      const lesson = WEEK01[lessonNo];
+    const weekNos = Object.keys(WEEKS || { 1: WEEK01 }).map(Number);
+    weekNos.forEach((weekNo) => [1, 2].forEach((lessonNo) => {
+      const lesson = (WEEKS || { 1: WEEK01 })[weekNo][lessonNo];
       if (!lesson) return;
+      const wTag = weekNo === 1 ? "" : `W${weekNo}`;
+      const taskPrefix = weekNo === 1 ? `task:L${lessonNo}:` : `task:W${weekNo}L${lessonNo}:`;
       lesson.study.forEach((seg, sIdx) => {
         map[`mark:${seg.id}`] = {
           id: `mark:${seg.id}`,
+          weekNo,
           lessonNo,
           book: seg.book,
-          title: `[第${lessonNo}節-段落${sIdx + 1}畫重點] ${seg.title}`
+          title: `[${wTag}第${lessonNo}節-段落${sIdx + 1}畫重點] ${seg.title}`
         };
         seg.checks.forEach((q, qIdx) => {
           map[q.id] = {
             id: q.id,
+            weekNo,
             lessonNo,
             book: q.bookRef || seg.book,
-            title: `[第${lessonNo}節-段落${sIdx + 1}-問題${qIdx + 1}] ${q.prompt}`
+            title: `[${wTag}第${lessonNo}節-段落${sIdx + 1}-問題${qIdx + 1}] ${q.prompt}`
           };
         });
       });
       lesson.tasks.forEach((t, tIdx) => {
-        map[`task:L${lessonNo}:${t.id}`] = {
-          id: `task:L${lessonNo}:${t.id}`,
+        map[`${taskPrefix}${t.id}`] = {
+          id: `${taskPrefix}${t.id}`,
+          weekNo,
           lessonNo,
           book: lesson.source,
-          title: `[第${lessonNo}節-整合任務${tIdx + 1}] ${t.prompt}`
+          title: `[${wTag}第${lessonNo}節-整合任務${tIdx + 1}] ${t.prompt}`
         };
       });
-    });
+    }));
     return map;
   }
 
@@ -421,8 +427,11 @@ export class CloudLearningTracker {
     const state = this.app?.state || {};
     const catalog = this.getQuestionCatalog();
 
-    const calcLessonMetrics = (lessonNo) => {
-      const lesson = WEEK01[lessonNo];
+    const sureWrongItems = [];
+    const calcLessonMetrics = (lessonNo, weekNo = 1) => {
+      const lesson = ((WEEKS || { 1: WEEK01 })[weekNo] || {})[lessonNo];
+      if (!lesson) return null;
+      const taskPrefix = weekNo === 1 ? `task:L${lessonNo}:` : `task:W${weekNo}L${lessonNo}:`;
       const p = (store && store[lesson.id]) || {
         completed: false,
         answers: {},
@@ -465,6 +474,15 @@ export class CloudLearningTracker {
         seg.checks.forEach((q) => {
           studyTotal++;
           const a = p.studyAnswers && p.studyAnswers[q.id];
+          if (a && a.sureWrong) {
+            sureWrongItems.push({
+              id: q.id,
+              title: catalog[q.id]?.title || q.prompt,
+              book: q.bookRef || seg.book,
+              count: a.sureWrong,
+              resolved: Boolean(a.correct)
+            });
+          }
           if (a) {
             errors += a.errors || 0;
             hints += a.hints || 0;
@@ -499,7 +517,7 @@ export class CloudLearningTracker {
             if (ta.firstTry || (ta.errors || 0) === 0) firstTryCount++;
           }
           if ((ta.errors || 0) >= 2) {
-            const key = `task:L${lessonNo}:${t.id}`;
+            const key = `${taskPrefix}${t.id}`;
             struggling.push({
               id: key,
               title: catalog[key]?.title || t.prompt,
@@ -535,7 +553,10 @@ export class CloudLearningTracker {
 
     const l1 = calcLessonMetrics(1);
     const l2 = calcLessonMetrics(2);
-    const allStruggling = [...l1.struggling, ...l2.struggling];
+    const w2l1 = calcLessonMetrics(1, 2);
+    const w2l2 = calcLessonMetrics(2, 2);
+    const week2Pct = w2l1 && w2l2 ? Math.round((w2l1.pct + w2l2.pct) / 2) : 0;
+    const allStruggling = [...l1.struggling, ...l2.struggling, ...(w2l1 ? w2l1.struggling : []), ...(w2l2 ? w2l2.struggling : [])];
     const unresolvedStruggling = allStruggling.filter((x) => !x.resolved);
 
     // 計算紅綠燈狀態
@@ -576,9 +597,13 @@ export class CloudLearningTracker {
       overallArchipelagoPct: this.app ? this.app.calculateOverallProgress() : 0,
       l1,
       l2,
-      totalErrors: l1.errors + l2.errors,
-      totalHints: l1.hints + l2.hints,
+      w2l1,
+      w2l2,
+      weekPct: { w1: overallWeek01Pct, w2: week2Pct },
+      totalErrors: l1.errors + l2.errors + (w2l1?.errors || 0) + (w2l2?.errors || 0),
+      totalHints: l1.hints + l2.hints + (w2l1?.hints || 0) + (w2l2?.hints || 0),
       strugglingItems: allStruggling,
+      sureWrongItems,
       quizScores,
       finalExamScore: state.finalExamScore?.score ?? null,
       updatedAt: new Date().toISOString(),
@@ -1142,6 +1167,10 @@ export class CloudLearningTracker {
       "第4課並聯_隨堂測驗",
       "第5課電容電感_隨堂測驗",
       "中央島_總複習測驗",
+      "第2週_完成率(%)",
+      "第2週_第1節完成率(%)",
+      "第2週_第2節完成率(%)",
+      "答錯但很確定_題目",
       "最後更新時間"
     ];
 
@@ -1180,6 +1209,10 @@ export class CloudLearningTracker {
       r.quizScores?.["island-04"] ?? "",
       r.quizScores?.["island-05"] ?? "",
       r.finalExamScore ?? "",
+      r.weekPct?.w2 ?? 0,
+      r.w2l1?.pct ?? 0,
+      r.w2l2?.pct ?? 0,
+      (r.sureWrongItems || []).map((x) => x.title).join("；"),
       r.updatedAt ? new Date(r.updatedAt).toLocaleString("zh-TW") : ""
     ]);
 
@@ -1440,6 +1473,42 @@ export class CloudLearningTracker {
       : "";
 
     // 迷思排行榜 HTML
+    // 「答錯但很確定」排行：學生自評很確定卻答錯，最可能是穩固的迷思概念
+    const sureWrongMap = {};
+    filtered.forEach((r) => {
+      (r.sureWrongItems || []).forEach((item) => {
+        if (!sureWrongMap[item.id]) {
+          sureWrongMap[item.id] = { id: item.id, title: item.title, book: item.book, studentCount: 0, students: [] };
+        }
+        sureWrongMap[item.id].studentCount++;
+        sureWrongMap[item.id].students.push(`${r.seatNo}號 ${r.studentName}`);
+      });
+    });
+    const topSureWrong = Object.values(sureWrongMap)
+      .sort((a, b) => b.studentCount - a.studentCount)
+      .slice(0, 4);
+    const sureWrongHtml = topSureWrong.length
+      ? `
+      <div class="war-misconception-box war-surewrong-box">
+        <h4 style="margin:0 0 8px;">🧠 「答錯但很確定」排行榜（學生自評很確定卻答錯，常是穩固的迷思）</h4>
+        <div class="war-misconception-grid">
+          ${topSureWrong
+            .map(
+              (m, i) => `
+            <div class="war-misconception-item">
+              <div class="wk-small wk-bold" style="color:#7c3aed;">TOP ${i + 1}｜${m.studentCount} 人很確定卻答錯</div>
+              <div class="wk-bold" style="margin:4px 0;">${m.title}</div>
+              <div class="wk-small wk-muted">📖 對照：${m.book}</div>
+              <div class="wk-small" style="margin-top:4px;">👤 學生：${m.students.join("、")}</div>
+            </div>
+          `
+            )
+            .join("")}
+        </div>
+      </div>
+    `
+      : "";
+
     const misconceptionsHtml = topMisconceptions.length
       ? `
       <div class="war-misconception-box">
@@ -1497,6 +1566,37 @@ export class CloudLearningTracker {
           </div>
         </div>
         ${
+          detailStudent.w2l1
+            ? `<div class="wk-two-col" style="margin-top:10px;">
+                ${[
+                  ["📗 第 2 週第 1 節：原子、價電子與導體", detailStudent.w2l1],
+                  ["📒 第 2 週第 2 節：電荷與靜電", detailStudent.w2l2]
+                ]
+                  .map(
+                    ([title, m]) => `<div class="war-detail-subcard">
+                    <h5 style="margin:0 0 6px;">${title}（完成度 ${m?.pct ?? 0}%）</h5>
+                    <ul class="wk-list wk-small">
+                      <li>課本畫重點：<strong>${m?.markDone ?? 0} ／ ${m?.markTotal ?? 0}</strong> 段</li>
+                      <li>隨讀互動題：<strong>${m?.studyDone ?? 0} ／ ${m?.studyTotal ?? 0}</strong> 題</li>
+                      <li>四步整合任務：<strong>${m?.taskDone ?? 0} ／ ${m?.taskTotal ?? 0}</strong> 步</li>
+                      <li>一次答對率：<strong>${m?.firstTryRate ?? 100}%</strong>（錯誤 ${m?.errors ?? 0} 次／提示 ${m?.hints ?? 0} 次）</li>
+                      <li>學生反思：<em>${m?.reflection ? `「${m.reflection}」` : "（尚未填寫）"}</em></li>
+                    </ul>
+                  </div>`
+                  )
+                  .join("")}
+              </div>`
+            : ""
+        }
+        ${
+          detailStudent.sureWrongItems && detailStudent.sureWrongItems.length
+            ? `<div class="wk-small" style="margin-top:8px; color:#6d28d9;">
+                <strong>🧠 答錯但很確定（可能的迷思）：</strong>
+                ${detailStudent.sureWrongItems.map((s) => `${s.title}（${s.resolved ? "已訂正" : "🔴 尚未通過"}）`).join(" ｜ ")}
+              </div>`
+            : ""
+        }
+        ${
           detailStudent.strugglingItems && detailStudent.strugglingItems.length
             ? `<div class="wk-small" style="margin-top:8px; color:var(--danger);">
                 <strong>⚠️ 曾反覆答錯（≥2次）的題目：</strong>
@@ -1551,6 +1651,10 @@ export class CloudLearningTracker {
                   <div class="war-mini-bar"><span style="width:${r.l2?.pct ?? 0}%"></span></div>
                   <small>${r.l2?.pct ?? 0}% (標記${r.l2?.markDone ?? 0}/5·題${r.l2?.studyDone ?? 0}/15)</small>
                 </td>
+                <td>
+                  <div class="war-mini-bar"><span style="width:${r.weekPct?.w2 ?? 0}%"></span></div>
+                  <small>${r.weekPct?.w2 ?? 0}% (節1 ${r.w2l1?.pct ?? 0}%·節2 ${r.w2l2?.pct ?? 0}%)</small>
+                </td>
                 <td><strong>${Math.round(((r.l1?.firstTryRate ?? 100) + (r.l2?.firstTryRate ?? 100)) / 2)}%</strong> <small class="wk-muted">(錯${r.totalErrors ?? 0})</small></td>
                 <td>${quiz3}</td>
                 <td>${strugglingText}</td>
@@ -1564,7 +1668,7 @@ export class CloudLearningTracker {
           .join("")
       : `
         <tr>
-          <td colspan="12" style="text-align:center; padding:24px;">
+          <td colspan="13" style="text-align:center; padding:24px;">
             目前「${this.selectedYearFilter === "ALL" ? "全部學年度" : this.selectedYearFilter} · ${this.selectedClassFilter === "ALL" ? "全部班級" : this.selectedClassFilter}」尚無學生登入紀錄。<br/>
             請學生點擊畫面右上角「<strong>👤 學生登入</strong>」開始作答，或點上方「<strong>🧪 載入模擬班級資料（15人）</strong>」立即預覽戰情室效果！
           </td>
@@ -1645,6 +1749,7 @@ export class CloudLearningTracker {
       </div>
 
       ${misconceptionsHtml}
+      ${sureWrongHtml}
       ${studentDetailModalHtml}
 
       <!-- 全班紅綠燈即時進度表 -->
@@ -1659,6 +1764,7 @@ export class CloudLearningTracker {
               <th>姓名</th>
               <th>第 1 節（四個部分）</th>
               <th>第 2 節（通/斷/短路）</th>
+              <th>第 2 週（原子與靜電）</th>
               <th>一次答對率</th>
               <th>隨堂測驗</th>
               <th>高頻卡關預警（錯≥2次）</th>

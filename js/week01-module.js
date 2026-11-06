@@ -1,23 +1,26 @@
 // 基本電學探索島｜18 週學期地圖與第 1 週（CH3 p.68–70）課本導讀、畫重點、SVG 圖解、7 種互動題型、電路模擬器與教師引導模組
 
+import { WEEK02, WEEK02_NEXT } from "./week02-module.js";
+import { buildWeek02Visuals, WEEK02_LABS } from "./week02-visuals.js";
+
 export const COURSE = {
-  version: "2026-11-01-planA-v6",
+  version: "2026-11-06-planA-v7",
   title: "基本電學探索島（方案 A 認知鷹架學習路徑）",
   routeStages: [
     { step: 1, weeks: "第 1 週", islandId: "island-03", islandName: "第 3 課：串聯電路", title: "車燈破冰：四元件與通／斷／短路", badge: "🚩 W1 起點" },
     { step: 2, weeks: "第 2–5 週", islandId: "island-01", islandName: "第 1 課：電的基本認識", title: "電荷 → 電流 → 電壓 → 功率", badge: "⚓ W2–5" },
     { step: 3, weeks: "第 6–8 週", islandId: "island-02", islandName: "第 2 課：電阻", title: "色碼 → 歐姆定律優先 → 溫度與焦耳熱", badge: "⚓ W6–8" },
     { step: 4, weeks: "第 9–11 週", islandId: "island-03", islandName: "第 3 課：串聯電路", title: "串聯單一迴路 → KVL 分壓 → 故障診斷", badge: "⚓ W9–11" },
-    { step: 5, weeks: "第 12–14 週", islandId: "island-04", islandName: "第 4 課：並聯電路", title: "並聯分支 → KCL 分流 → 惠斯登電橋", badge: "⚓ W12–14" },
-    { step: 6, weeks: "第 15–16 週", islandId: "island-05", islandName: "第 5 課：電容與電感", title: "電容儲能屏蔽 → 馬達左手／發電機右手", badge: "⚓ W15–16" },
-    { step: 7, weeks: "第 17–18 週", islandId: "center-island", islandName: "中央島：基本電學練工坊", title: "弱點補強 → 車用電系跨章節總整合", badge: "🧭 W17–18" }
+    { step: 5, weeks: "第 12–14 週", islandId: "island-04", islandName: "第 4 課：並聯電路", title: "並聯分支 → KCL 分流 → 搭鐵與惠斯登電橋簡介", badge: "⚓ W12–14" },
+    { step: 6, weeks: "第 15–17 週", islandId: "island-05", islandName: "第 5 課：電容與電感", title: "電容 → 電場電位 → 馬達左手／發電機右手", badge: "⚓ W15–17" },
+    { step: 7, weeks: "第 18 週", islandId: "center-island", islandName: "中央島：基本電學練工坊", title: "車用電系跨章節總複習與結業任務", badge: "🧭 W18" }
   ],
   weeks: [
     { id: 1, islandId: "island-03", islandName: "第 3 課：串聯電路", title: "讓車燈亮起來（破冰起點）", source: "CH3 p.68–70", status: "open", lessons: ["電路的四個部分", "通路、斷路與短路"], goal: "能辨認電源、導線、開關、負載，並判斷車燈不亮的原因。" },
-    { id: 2, islandId: "island-01", islandName: "第 1 課：電的基本認識", title: "電荷、自由電子與靜電", source: "CH1 p.2–12 (1-1, 1-3)", status: "planned", lessons: ["原子、價電子與導體", "電荷與靜電感應"], goal: "能用圖解說明自由電子移動與靜電現象。" },
+    { id: 2, islandId: "island-01", islandName: "第 1 課：電的基本認識", title: "原子、自由電子與靜電", source: "CH1 p.2–5、9–12（1-1.1～1-1.4、1-3）", status: "open", lessons: ["原子、價電子與導體", "電荷與靜電"], goal: "能用原子結構與價電子分辨導體，並用電子轉移解釋摩擦起電與靜電現象。" },
     { id: 3, islandId: "island-01", islandName: "第 1 課：電的基本認識", title: "電流的形成與方向（先懂流動）", source: "CH1 p.19–21 (1-5)", status: "planned", lessons: ["電流的意義 I = Q / t", "傳統電流與電子流方向"], goal: "能理解電荷流動形成電流，並分辨傳統電流與電子流方向。" },
-    { id: 4, islandId: "island-01", islandName: "第 1 課：電的基本認識", title: "電壓、電位差與常用單位（再懂推力）", source: "CH1 p.5–7、13–18 (1-1.6, 1-4)", status: "planned", lessons: ["電壓推力 V = W / Q 與端電壓壓降", "SI 常用單位與乘冪換算"], goal: "能理解電壓是推動電流的原因，並辨認電動勢與端電壓的關係。" },
-    { id: 5, islandId: "island-01", islandName: "第 1 課：電的基本認識", title: "電功率、一度電與效率", source: "CH1 p.8–9、22–29 (1-2, 1-6)", status: "planned", lessons: ["車燈功率 P = V × I 與馬力", "一度電 (kWh) 與能量轉換效率"], goal: "能結合電壓與電流計算電功率、用電度數與系統效率。" },
+    { id: 4, islandId: "island-01", islandName: "第 1 課：電的基本認識", title: "電壓、電位差與常用單位（再懂推力）", source: "CH1 p.5–7、13–18（1-1.5～1-1.7、1-4）", status: "planned", lessons: ["電壓推力 V = W / Q 與端電壓壓降", "SI 常用單位與乘冪換算"], goal: "能理解電壓是推動電流的原因，並辨認電動勢與端電壓的關係。" },
+    { id: 5, islandId: "island-01", islandName: "第 1 課：電的基本認識", title: "電能、電功率、一度電與效率", source: "CH1 p.8、22–29（1-2、1-6）", status: "planned", lessons: ["車燈功率 P = V × I 與馬力", "一度電 (kWh) 與能量轉換效率"], goal: "能結合電壓與電流計算電功率、用電度數與系統效率。" },
     { id: 6, islandId: "island-02", islandName: "第 2 課：電阻", title: "電阻定律與色碼電阻", source: "CH2 p.36–47 (2-1, 2-2)", status: "planned", lessons: ["影響電阻的因素 R = ρℓ/A", "四環色碼電阻與文數字標示"], goal: "能判斷導線長短粗細對電阻的影響，並正確判讀四環色碼電阻。" },
     { id: 7, islandId: "island-02", islandName: "第 2 課：電阻", title: "歐姆定律與功率大貫通（核心優先）", source: "CH2 p.52–56 (2-4)", status: "planned", lessons: ["歐姆定律 I = V / R 關係圖解", "功率延伸公式 P = I²R = V² / R"], goal: "能優先貫通電壓、電流與電阻的歐姆定律關係並完成分步解題。" },
     { id: 8, islandId: "island-02", islandName: "第 2 課：電阻", title: "溫度感測與焦耳熱效應專題", source: "CH2 p.42、48–51、57–60 (2-3, 2-5)", status: "planned", lessons: ["NTC/PTC 熱敏電阻與溫度係數 α", "焦耳定律 H = 0.24 I²Rt 與過熱防範"], goal: "能理解溫度如何改變電阻，並用焦耳熱效應解釋短路為何引發高溫火災。" },
@@ -25,12 +28,12 @@ export const COURSE = {
     { id: 10, islandId: "island-03", islandName: "第 3 課：串聯電路", title: "沿路看電壓：KVL 與分壓定則", source: "CH3 p.77–81 (3-2, 3-3)", status: "planned", lessons: ["克希荷夫電壓定律（KVL）", "串聯電壓分配定則"], goal: "能沿封閉迴路驗證電壓升等於電壓降，並計算各電阻分壓。" },
     { id: 11, islandId: "island-03", islandName: "第 3 課：串聯電路", title: "串聯應用與故障診斷", source: "CH3 p.82–86 (3-4)", status: "planned", lessons: ["限流電阻與電流錶串聯", "不同瓦數燈泡串聯與故障判讀"], goal: "能根據串聯分壓判斷哪顆燈泡較亮或先燒毀，並選出合理檢查點。" },
     { id: 12, islandId: "island-04", islandName: "第 4 課：並聯電路", title: "並聯分支、等電壓與總電阻", source: "CH4 p.90–97 (4-1)", status: "planned", lessons: ["看出並聯分支與等電壓特性", "並聯總電導與總電阻計算"], goal: "能指出並聯的不同支路，並理解並聯總電阻小於任一支路電阻。" },
-    { id: 13, islandId: "island-04", islandName: "第 4 課：並聯電路", title: "節點分流与匯流：KCL 與分流定則", source: "CH4 p.98–102 (4-2, 4-3)", status: "planned", lessons: ["克希荷夫電流定律（KCL）", "並聯電流分配定則（反比分流）"], goal: "能說明各支路電流如何匯流成總電流，並完成反比分流計算。" },
-    { id: 14, islandId: "island-04", islandName: "第 4 課：並聯電路", title: "串並聯整合與惠斯登電橋", source: "CH4 p.103–112 (4-4, 4-5)", status: "planned", lessons: ["家用插座三線與汽車搭鐵並聯", "惠斯登電橋平衡 R₁R_x = R₂R_S"], goal: "能先辨認串並聯結構再化簡，並利用電橋平衡條件求出未知電阻。" },
-    { id: 15, islandId: "island-05", islandName: "第 5 課：電容與電感", title: "電容器儲能與車殼防雷屏蔽", source: "CH5 p.122–146 (5-1, 5-2)", status: "planned", lessons: ["平行板電容器充放電與串並聯", "電場、電位與金屬車殼靜電屏蔽"], goal: "能辨認電容器構造、串並聯規律與金屬內部 E=0 的防雷原理。" },
-    { id: 16, islandId: "island-05", islandName: "第 5 課：電容與電感", title: "電感、馬達左手與發電機右手定則", source: "CH5 p.147–171 (5-3～5-6)", status: "planned", lessons: ["電感器儲能與磁場基本特性", "佛萊明左手（電動機）與右手（發電機）"], goal: "能區分電生磁受力（馬達左手定則）與磁生電感應（發電機右手定則）。" },
-    { id: 17, islandId: "center-island", islandName: "中央島：基本電學練工坊", title: "弱點診斷與彈性補救", source: "依班級進度", status: "planned", lessons: ["未完成站點補強", "常見迷思概念修復"], goal: "依學習紀錄補強較弱的概念。" },
-    { id: 18, islandId: "center-island", islandName: "中央島：基本電學練工坊", title: "車用電系跨章節綜合任務", source: "CH1–CH5 總整合", status: "planned", lessons: ["車用電系綜合排故任務", "回顧與結業證書"], goal: "能依證據說明簡單電路的運作或故障。" }
+    { id: 13, islandId: "island-04", islandName: "第 4 課：並聯電路", title: "節點分流與匯流：KCL 與分流定則", source: "CH4 p.98–102 (4-2, 4-3)", status: "planned", lessons: ["克希荷夫電流定律（KCL）", "並聯電流分配定則（反比分流）"], goal: "能說明各支路電流如何匯流成總電流，並完成反比分流計算。" },
+    { id: 14, islandId: "island-04", islandName: "第 4 課：並聯電路", title: "並聯應用、搭鐵與惠斯登電橋簡介", source: "CH4 p.103–105（4-4）＋p.106–112 電橋部分（※4-5 選讀，只講概念）", status: "planned", lessons: ["家電並聯、汽車搭鐵與電壓錶並聯", "惠斯登電橋平衡概念（老師補充：熱線式進氣流量感測器）"], goal: "能辨認並聯應用與搭鐵迴路，並說出電橋平衡的基本概念與車上應用。" },
+    { id: 15, islandId: "island-05", islandName: "第 5 課：電容與電感", title: "電容器與電容量", source: "CH5 p.122–135（5-1）", status: "planned", lessons: ["電容器構造、種類與標示", "電容量、儲能與串並聯"], goal: "能說明電容器如何儲存電荷，並判斷電容串並聯的變化。" },
+    { id: 16, islandId: "island-05", islandName: "第 5 課：電容與電感", title: "電場、電位與電感基本概念", source: "CH5 p.136–146（5-2）＋p.147–152 概念（※5-3 選讀）", status: "planned", lessons: ["電力線、庫侖靜電力與電場強度", "電位與電感器基本概念"], goal: "能用電力線與庫侖定律說明電荷間的作用，並認識電感器以磁場儲能。" },
+    { id: 17, islandId: "island-05", islandName: "第 5 課：電容與電感", title: "磁、安培右手、佛萊明左手與右手", source: "CH5 p.153–171（5-4～5-6）", status: "planned", lessons: ["磁的基本認識與安培右手定則", "馬達左手定則、法拉第與發電機右手定則"], goal: "能區分電生磁受力（馬達左手）與磁生電感應（發電機右手）。" },
+    { id: 18, islandId: "center-island", islandName: "中央島：基本電學練工坊", title: "車用電系跨章節總複習與結業任務", source: "CH1–CH5 總整合", status: "planned", lessons: ["弱點診斷與車用電系綜合任務", "回顧與結業證書"], goal: "能依證據說明簡單電路的運作或故障。" }
   ]
 };
 
@@ -689,7 +692,20 @@ function buildVisuals() {
   };
 }
 
-export const ElectricVisuals = buildVisuals();
+const BASE_VISUALS = buildVisuals();
+const WEEK02_VISUALS = buildWeek02Visuals();
+export const ElectricVisuals = {
+  get(segmentId) {
+    return BASE_VISUALS.get(segmentId) || WEEK02_VISUALS[segmentId] || null;
+  }
+};
+
+// 已建置的週次教材（之後每完成一週就加進來）
+export const WEEKS = { 1: WEEK01, 2: WEEK02 };
+export const LABS = WEEK02_LABS;
+const WEEK_NEXT = {
+  2: WEEK02_NEXT
+};
 
 const PROGRESS_KEY = "basic-electricity-island-progress-v1";
 
@@ -697,7 +713,10 @@ export class GuidedStudyController {
   constructor(app) {
     this.app = app;
     this.lessonNo = 1; // 1 or 2
+    this.weekNo = 1; // 目前顯示的週次
     this.ui = {
+      labs: {},
+      conf: {},
       concept: 0,
       task: 0,
       sim: "open",
@@ -759,6 +778,115 @@ export class GuidedStudyController {
       this.saveStore();
     }
     return p;
+  }
+
+  // ===== 多週次共用工具 =====
+  openWeeksFor(islandId) {
+    return COURSE.weeks
+      .filter((w) => w.islandId === islandId && w.status === "open" && WEEKS[w.id])
+      .map((w) => w.id);
+  }
+
+  currentLesson() {
+    const week = WEEKS[this.weekNo] || WEEK01;
+    return week[this.lessonNo] || week[1];
+  }
+
+  resetLessonUi() {
+    this.ui.concept = 0;
+    this.ui.task = 0;
+    this.ui.sim = "open";
+    this.ui.studyIndex = 0;
+    this.ui.chosen = null;
+    this.ui.wrong = 0;
+    this.ui.guide = 0;
+    this.ui.unlockMissionPreview = false;
+  }
+
+  labStateFor(lesson) {
+    const lab = lesson && lesson.lab ? LABS[lesson.lab] : null;
+    if (!lab) return null;
+    if (!this.ui.labs[lesson.lab]) this.ui.labs[lesson.lab] = lab.init();
+    return this.ui.labs[lesson.lab];
+  }
+
+  labKey(lesson) {
+    const state = this.labStateFor(lesson);
+    return state ? LABS[lesson.lab].key(state) : "";
+  }
+
+  patternMatch(pattern, value) {
+    const a = String(pattern).split(":");
+    const b = String(value).split(":");
+    return a.length === b.length && a.every((part, i) => part === "*" || part === b[i]);
+  }
+
+  // 依島嶼決定要顯示哪一週；回傳 false 代表本島尚無開放週次
+  syncWeekForIsland(islandId) {
+    const open = this.openWeeksFor(islandId);
+    if (this.ui.previewWeek01OnOtherIsland && !open.includes(1)) {
+      if (this.weekNo !== 1) {
+        this.weekNo = 1;
+        this.lessonNo = 1;
+        this.resetLessonUi();
+      }
+      return true;
+    }
+    if (!open.length) return false;
+    if (!open.includes(this.weekNo)) {
+      this.weekNo = open[0];
+      this.lessonNo = 1;
+      this.resetLessonUi();
+    }
+    return true;
+  }
+
+  renderWeekSwitcher(wrap, islandId, rerender) {
+    const open = this.openWeeksFor(islandId);
+    if (open.length < 2) return;
+    const row = this.node("div", "wk-lesson-tabs wk-week-switch");
+    row.appendChild(this.node("span", "wk-bold wk-small", "本島已開放週次："));
+    open.forEach((id) => {
+      const meta = COURSE.weeks.find((w) => w.id === id);
+      row.appendChild(
+        this.btn(
+          `第 ${id} 週｜${meta ? meta.title : ""}`,
+          () => {
+            this.weekNo = id;
+            this.lessonNo = 1;
+            this.resetLessonUi();
+            rerender();
+          },
+          `btn ${this.weekNo === id ? "btn-primary" : ""}`
+        )
+      );
+    });
+    wrap.appendChild(row);
+  }
+
+  renderLabBox(target, lesson, rerender) {
+    const lab = LABS[lesson.lab];
+    const state = this.labStateFor(lesson);
+    const box = this.node("div", "wk-sim wk-lab");
+    const art = this.node("div", "wk-sim-art");
+    art.innerHTML = lab.markup(state);
+    const controls = this.node("div", "wk-btn-row");
+    lab.controls(state).forEach((c) => {
+      const b = this.btn(
+        c.label,
+        () => {
+          this.ui.labs[lesson.lab] = c.apply(state);
+          rerender();
+        },
+        `btn ${c.active ? "btn-primary" : ""}`
+      );
+      b.disabled = Boolean(c.disabled);
+      b.setAttribute("aria-pressed", c.active ? "true" : "false");
+      controls.appendChild(b);
+    });
+    this.append(box, art, controls, this.node("p", "wk-sim-status", lab.status(state)));
+    if (lab.note) box.appendChild(this.node("p", "wk-muted wk-small", lab.note));
+    target.appendChild(box);
   }
 
   node(tag, className, value) {
@@ -858,7 +986,7 @@ export class GuidedStudyController {
       this.node(
         "p",
         "",
-        "每節課保留約 25–30 分鐘平台自學（課本畫重點 → 解鎖 SVG 概念圖解 → 7 種互動題型 → 電路模擬器），搭配教師引導與出口小卡。第 1 週已完整開放，並與 3D 群島 5 座章節島無縫串聯！"
+        "每節課保留約 25–30 分鐘平台自學（課本畫重點 → 解鎖 SVG 概念圖解 → 7 種互動題型 → 電路模擬器），搭配教師引導與出口小卡。第 1、2 週已完整開放（第 2 週在第 1 課島），並與 3D 群島 5 座章節島無縫串聯！"
       )
     );
     wrap.appendChild(hero);
@@ -877,6 +1005,7 @@ export class GuidedStudyController {
       this.btn(
         "🎯 開始第 1 節（電路的四個部分）",
         () => {
+          this.weekNo = 1;
           this.lessonNo = 1;
           this.ui.studyIndex = 0;
           if (this.app.scene3D) this.app.scene3D.flyToIsland("island-03");
@@ -887,6 +1016,7 @@ export class GuidedStudyController {
       this.btn(
         "🎯 開始第 2 節（通路、斷路與短路）",
         () => {
+          this.weekNo = 1;
           this.lessonNo = 2;
           this.ui.studyIndex = 0;
           if (this.app.scene3D) this.app.scene3D.flyToIsland("island-03");
@@ -897,11 +1027,23 @@ export class GuidedStudyController {
       this.btn(
         "👨‍🏫 進入第 1 週教師引導頁",
         () => {
+          this.weekNo = 1;
           this.lessonNo = 1;
           if (this.app.scene3D) this.app.scene3D.flyToIsland("island-03");
           this.app.openIslandDrawer("island-03", "teacherMode");
         },
         "btn"
+      ),
+      this.btn(
+        "⚛️ 開始第 2 週（原子、自由電子與靜電）",
+        () => {
+          this.weekNo = 2;
+          this.lessonNo = 1;
+          this.resetLessonUi();
+          if (this.app.scene3D) this.app.scene3D.flyToIsland("island-01");
+          this.app.openIslandDrawer("island-01", "guidedStudy");
+        },
+        "btn btn-primary"
       )
     );
     introCard.appendChild(introActions);
@@ -928,7 +1070,7 @@ export class GuidedStudyController {
       this.node(
         "p",
         "wk-muted wk-small",
-        "第 1 週先從第 3 課「車燈電路」破冰建立整體畫面 → 第 2–5 週回第 1 課依「電荷 → 電流(流動) → 電壓(推力) → 功率」直覺鏈學習 → 第 6–8 週在第 2 課優先貫通「歐姆定律」再學溫度與焦耳熱 → 第 9–16 週深入串聯、並聯與電容電感。"
+        "第 1 週先從第 3 課「車燈電路」破冰建立整體畫面 → 第 2–5 週回第 1 課依「電荷 → 電流(流動) → 電壓(推力) → 功率」直覺鏈學習 → 第 6–8 週在第 2 課優先貫通「歐姆定律」再學溫度與焦耳熱 → 第 9–17 週深入串聯、並聯與電容電感（第 17 週電磁），第 18 週回中央島總複習。"
       )
     );
     const routeRow = this.node("div", "wk-btn-row");
@@ -938,6 +1080,7 @@ export class GuidedStudyController {
         () => {
           if (this.app.scene3D) this.app.scene3D.flyToIsland(st.islandId);
           if (st.step === 1) {
+            this.weekNo = 1;
             this.lessonNo = 1;
             this.ui.studyIndex = 0;
             this.app.openIslandDrawer("island-03", "guidedStudy");
@@ -984,6 +1127,7 @@ export class GuidedStudyController {
           this.btn(
             "🎯 進入本週導讀闖關",
             () => {
+              this.weekNo = w.id;
               this.lessonNo = 1;
               this.ui.studyIndex = 0;
               if (this.app.scene3D) this.app.scene3D.flyToIsland(w.islandId);
@@ -994,6 +1138,7 @@ export class GuidedStudyController {
           this.btn(
             "👨‍🏫 教師模式",
             () => {
+              this.weekNo = w.id;
               this.lessonNo = 1;
               if (this.app.scene3D) this.app.scene3D.flyToIsland(w.islandId);
               this.app.openIslandDrawer(w.islandId, "teacherMode");
@@ -1027,14 +1172,14 @@ export class GuidedStudyController {
     container.innerHTML = "";
     const wrap = this.node("div", "wk-container");
 
-    // 若不是第 3 島（第 1 週所在章節 CH3），且尚未開啟預覽，先顯示該島對應週次規畫，並提供一鍵切換至第 1 週完整互動體驗
-    if (islandId !== "island-03" && !this.ui.previewWeek01OnOtherIsland) {
+    // 本島若尚無開放週次（且未開啟第 1 週預覽），先顯示該島對應週次規畫
+    if (!this.syncWeekForIsland(islandId)) {
       this.renderPlannedIslandOverview(wrap, islandId, "student");
       container.appendChild(wrap);
       return;
     }
 
-    if (islandId !== "island-03") {
+    if (this.ui.previewWeek01OnOtherIsland && !this.openWeeksFor(islandId).includes(1)) {
       const notice = this.node("div", "mascot-tip-box");
       notice.innerHTML = `
         <div style="font-size:1.6rem;">🧭</div>
@@ -1050,14 +1195,16 @@ export class GuidedStudyController {
       });
     }
 
-    const lesson = WEEK01[this.lessonNo];
+    const studentRerender = () => this.renderStudentGuidedTab(container, islandId);
+    this.renderWeekSwitcher(wrap, islandId, studentRerender);
+    const lesson = this.currentLesson();
     const p = this.progressFor(lesson);
 
     // 頂部標題與節次切換列
     const hero = this.node("div", "wk-hero");
     this.append(
       hero,
-      this.node("div", "wk-eyebrow", `第 1 週 · 第 ${this.lessonNo} 節 · 學生課本導讀與互動闖關`),
+      this.node("div", "wk-eyebrow", `第 ${this.weekNo} 週 · 第 ${this.lessonNo} 節 · 學生課本導讀與互動闖關`),
       this.node("h3", "", `${lesson.title} — ${lesson.subtitle}`),
       this.node("p", "", lesson.source)
     );
@@ -1104,7 +1251,7 @@ export class GuidedStudyController {
     const tabBar = this.node("div", "wk-lesson-tabs");
     [1, 2].forEach((n) => {
       const b = this.btn(
-        `第 ${n} 節｜${WEEK01[n].title}`,
+        `第 ${n} 節｜${(WEEKS[this.weekNo] || WEEK01)[n].title}`,
         () => {
           this.lessonNo = n;
           this.ui.concept = 0;
@@ -1128,15 +1275,17 @@ export class GuidedStudyController {
       "btn btn-accent"
     );
     tabBar.appendChild(toTeacherBtn);
-    const nextPlanABtn = this.btn(
-      "🚀 方案A下一站：第 1 課（W2–5 電荷→電流→電壓→功率）",
-      () => {
-        if (this.app.scene3D) this.app.scene3D.flyToIsland("island-01");
-        this.app.openIslandDrawer("island-01", "textbook");
-      },
-      "btn"
-    );
-    tabBar.appendChild(nextPlanABtn);
+    if (this.weekNo === 1) {
+      const nextPlanABtn = this.btn(
+        "🚀 方案A下一站：第 1 課（W2–5 電荷→電流→電壓→功率）",
+        () => {
+          if (this.app.scene3D) this.app.scene3D.flyToIsland("island-01");
+          this.app.openIslandDrawer("island-01", "guidedStudy");
+        },
+        "btn"
+      );
+      tabBar.appendChild(nextPlanABtn);
+    }
     wrap.appendChild(tabBar);
 
     // 今天要會的事
@@ -1161,14 +1310,21 @@ export class GuidedStudyController {
       this.renderStudentGuidedTab(container, islandId);
     });
 
-    this.append(
-      rightSim,
-      this.node("h3", "", "🔌 電路觀察器（互動狀態模擬）"),
-      this.node("p", "wk-muted wk-small", "點選下方狀態按鈕，沿著圖上的線找路徑。這是概念示意，不作為實體接線指示。")
-    );
-    this.renderSimulatorBox(rightSim, false, () => {
-      this.renderStudentGuidedTab(container, islandId);
-    });
+    if (lesson.lab && LABS[lesson.lab]) {
+      this.append(
+        rightSim,
+        this.node("h3", "", LABS[lesson.lab].title),
+        this.node("p", "wk-muted wk-small", LABS[lesson.lab].intro)
+      );
+      this.renderLabBox(rightSim, lesson, studentRerender);
+    } else {
+      this.append(
+        rightSim,
+        this.node("h3", "", "🔌 電路觀察器（互動狀態模擬）"),
+        this.node("p", "wk-muted wk-small", "點選下方狀態按鈕，沿著圖上的線找路徑。這是概念示意，不作為實體接線指示。")
+      );
+      this.renderSimulatorBox(rightSim, false, studentRerender);
+    }
 
     this.append(stageGrid, leftConcept, rightSim);
     wrap.appendChild(stageGrid);
@@ -1183,7 +1339,7 @@ export class GuidedStudyController {
       this.append(
         locked,
         this.node("h3", "", "🔒 任務站尚未開啟（四步整合任務）"),
-        this.node("p", "", "請先完成上方 5 個段落的「課本畫重點標記」與「隨讀檢核題」，即可自動開啟四步整合任務！")
+        this.node("p", "", `請先完成上方 ${lesson.study.length} 個段落的「課本畫重點標記」與「隨讀檢核題」，即可自動開啟四步整合任務！`)
       );
       const previewRow = this.node("div", "wk-btn-row");
       previewRow.appendChild(
@@ -1250,6 +1406,7 @@ export class GuidedStudyController {
       this.btn(
         "⚡ 飛往第 3 島體驗「第 1 週：讓車燈亮起來」破冰起點",
         () => {
+          this.weekNo = 1;
           this.lessonNo = 1;
           this.ui.studyIndex = 0;
           if (this.app.scene3D) this.app.scene3D.flyToIsland("island-03");
@@ -1261,6 +1418,9 @@ export class GuidedStudyController {
         "👁️ 在本島直接預覽「第 1 週」互動導讀",
         () => {
           this.ui.previewWeek01OnOtherIsland = true;
+          this.weekNo = 1;
+          this.lessonNo = 1;
+          this.resetLessonUi();
           this.app.renderDrawerBody();
         },
         "btn"
@@ -1289,7 +1449,7 @@ export class GuidedStudyController {
       this.node(
         "p",
         "wk-muted wk-small",
-        "先讀指定課本段落，自己判斷並在課本標記重點，即可解鎖「原創 SVG 概念圖解」與「多元隨讀互動題（是非、選擇、配合、拖拉、分類、排序、消除）」。"
+        "先讀指定課本段落，自己判斷並在課本標記重點，即可解鎖「原創 SVG 概念圖解」與多元隨讀互動題。作答前可以先選「我很確定／有點猜」，幫老師了解你的想法。"
       )
     );
 
@@ -1527,7 +1687,13 @@ export class GuidedStudyController {
       drag: "拖拉／點選配對題",
       classify: "概念分類題",
       order: "流程順序題",
-      eliminate: "錯誤消除題"
+      eliminate: "錯誤消除題",
+      numeric: "數值＋單位題",
+      steps: "分步解題",
+      cloze: "字庫克漏字",
+      hotspot: "圖上點選題",
+      poe: "預測→觀察→解釋",
+      spoterror: "抓錯題"
     };
     const badgeRow = this.node("div", "wk-badge-row");
     badgeRow.appendChild(
@@ -1541,7 +1707,11 @@ export class GuidedStudyController {
 
     const saved = p.studyAnswers[q.id];
     if (saved && saved.correct) {
-      this.append(box, this.node("p", "wk-feedback ok", `✅ 已完成！${q.explanation}`));
+      let doneText = `✅ 已完成！${q.explanation}`;
+      if (q.type === "poe" && saved.predictRight === false) {
+        doneText += "（你一開始的預測和結果不同，但透過觀察修正了想法，這就是學習！）";
+      }
+      this.append(box, this.node("p", "wk-feedback ok", doneText));
       card.appendChild(box);
       return;
     }
@@ -1604,6 +1774,32 @@ export class GuidedStudyController {
       this.renderVariantWidget(box, q);
     }
 
+    // 作答信心（選填）：協助老師分辨「真的會」與「用猜的」
+    const confRow = this.node("div", "wk-conf-row");
+    confRow.appendChild(this.node("span", "wk-small wk-muted", "作答信心（選填）："));
+    [
+      ["sure", "😎 我很確定"],
+      ["guess", "🤔 有點用猜的"]
+    ].forEach(([val, label]) => {
+      const on = this.ui.conf[q.id] === val;
+      const b = this.btn(
+        label,
+        () => {
+          this.ui.conf[q.id] = this.ui.conf[q.id] === val ? undefined : val;
+          confRow.querySelectorAll("button").forEach((x) => {
+            const active = x.dataset.conf === this.ui.conf[q.id];
+            x.classList.toggle("selected", active);
+            x.setAttribute("aria-pressed", active ? "true" : "false");
+          });
+        },
+        `wk-conf-btn ${on ? "selected" : ""}`
+      );
+      b.dataset.conf = val;
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+      confRow.appendChild(b);
+    });
+    box.appendChild(confRow);
+
     const feedback = this.node("div", "wk-feedback");
     const actions = this.node("div", "wk-btn-row");
     this.append(
@@ -1615,12 +1811,18 @@ export class GuidedStudyController {
           const result = this.questionResult(q, answer);
           if (!result.valid) {
             feedback.className = "wk-feedback error";
-            feedback.textContent = "請先完成這一題的選擇或配置，再按檢查。";
+            feedback.textContent = result.invalidText || "請先完成這一題的選擇或配置，再按檢查。";
             return;
           }
           const record = p.studyAnswers[q.id] || { attempts: 0, errors: 0, hints: 0 };
           record.attempts++;
+          const conf = this.ui.conf[q.id];
+          if (conf) record.lastConf = conf;
+          if (result.predictRight !== undefined && record.predictRight === undefined) {
+            record.predictRight = result.predictRight;
+          }
           if (result.ok) {
+            if (conf === "guess") record.guessRight = true;
             record.correct = true;
             record.firstTry = record.errors === 0;
             p.studyAnswers[q.id] = record;
@@ -1630,11 +1832,19 @@ export class GuidedStudyController {
           } else {
             record.errors++;
             record.correct = false;
+            if (conf === "sure") record.sureWrong = (record.sureWrong || 0) + 1;
             p.studyAnswers[q.id] = record;
             p.updatedAt = new Date().toISOString();
             this.saveStore();
             feedback.className = "wk-feedback error";
-            feedback.textContent = q.wrong + (record.errors >= 2 ? " 💡 提示：" + q.hint : "");
+            feedback.textContent = (result.detail || q.wrong) + (record.errors >= 2 ? " 💡 提示：" + q.hint : "");
+            if (q.type === "steps" || q.type === "cloze") {
+              box.querySelectorAll("[data-step-mark]").forEach((m) => {
+                const ok = result.marks && result.marks[m.dataset.stepMark];
+                m.textContent = ok ? "✓" : "✗";
+                m.className = `wk-step-mark ${ok ? "ok" : "bad"}`;
+              });
+            }
           }
         },
         "btn btn-primary"
@@ -1663,6 +1873,285 @@ export class GuidedStudyController {
     else if (q.type === "order") this.renderOrder(wrap, q);
     else if (q.type === "eliminate") this.renderEliminate(wrap, q);
     else if (q.type === "classify") this.renderClassify(wrap, q);
+    else if (q.type === "numeric") this.renderNumeric(wrap, q);
+    else if (q.type === "steps") this.renderSteps(wrap, q);
+    else if (q.type === "cloze") this.renderCloze(wrap, q);
+    else if (q.type === "hotspot") this.renderHotspot(wrap, q);
+    else if (q.type === "poe") this.renderPoe(wrap, q);
+    else if (q.type === "spoterror") this.renderSpotError(wrap, q);
+  }
+
+  // ===== 新題型 1：數值＋單位 =====
+  renderNumeric(wrap, q) {
+    const state = this.ui.studyChoices[q.id] || { num: "", exp: "", unit: "" };
+    this.ui.studyChoices[q.id] = state;
+    wrap.appendChild(
+      this.node("p", "wk-muted wk-small", q.sci ? "填入數字；需要的話可在「×10 的次方」填指數（例如 1.6 × 10^-19 就填 1.6 和 -19），最後選單位。" : "填入數字，再選單位。")
+    );
+    const row = this.node("div", "wk-numeric-row");
+    const num = this.node("input", "wk-num-input");
+    num.type = "text";
+    num.inputMode = "decimal";
+    num.placeholder = "數字";
+    num.value = state.num;
+    num.setAttribute("aria-label", "數值");
+    num.addEventListener("input", () => (state.num = num.value));
+    row.appendChild(num);
+    if (q.sci) {
+      row.appendChild(this.node("span", "wk-bold", "× 10^"));
+      const exp = this.node("input", "wk-num-input wk-exp-input");
+      exp.type = "text";
+      exp.inputMode = "numeric";
+      exp.placeholder = "0";
+      exp.value = state.exp;
+      exp.setAttribute("aria-label", "10 的次方（可留空）");
+      exp.addEventListener("input", () => (state.exp = exp.value));
+      row.appendChild(exp);
+    }
+    const unit = this.node("select", "wk-unit-select");
+    unit.setAttribute("aria-label", "單位");
+    const empty = this.node("option", "", "選單位");
+    empty.value = "";
+    unit.appendChild(empty);
+    q.units.forEach((u) => {
+      const o = this.node("option", "", u);
+      o.value = u;
+      unit.appendChild(o);
+    });
+    unit.value = state.unit;
+    unit.addEventListener("change", () => (state.unit = unit.value));
+    row.appendChild(unit);
+    wrap.appendChild(row);
+  }
+
+  parseNumber(text) {
+    if (text === undefined || text === null) return NaN;
+    const t = String(text)
+      .trim()
+      .replace(/[−－]/g, "-")
+      .replace(/[，,]/g, "")
+      .replace(/[×xX]\s*10\s*\^\s*/, "e")
+      .replace(/＋/g, "+");
+    if (!t) return NaN;
+    return Number(t);
+  }
+
+  // ===== 新題型 2：分步解題 =====
+  renderSteps(wrap, q) {
+    const state = this.ui.studyChoices[q.id] || {};
+    this.ui.studyChoices[q.id] = state;
+    wrap.appendChild(this.node("p", "wk-muted wk-small", "一步一步來：每一步選一個答案，全部選完再按「檢查答案」。答錯時會標出哪一步需要再想想。"));
+    q.steps.forEach((step, si) => {
+      const row = this.node("div", "wk-step-row");
+      const head = this.node("div", "wk-step-head");
+      const mark = this.node("span", "wk-step-mark", "");
+      mark.dataset.stepMark = String(si);
+      this.append(head, mark, this.node("span", "wk-bold", step.label));
+      row.appendChild(head);
+      const group = this.node("div", "wk-option-list");
+      this.shuffledOnce(`steps:${q.id}:${si}`, step.choices.map((_, i) => i)).forEach((ci) => {
+        const b = this.btn(
+          step.choices[ci],
+          () => {
+            state[si] = ci;
+            group.querySelectorAll("button").forEach((x) => {
+              x.classList.remove("selected");
+              x.setAttribute("aria-pressed", "false");
+            });
+            b.classList.add("selected");
+            b.setAttribute("aria-pressed", "true");
+          },
+          `wk-option ${state[si] === ci ? "selected" : ""}`
+        );
+        b.setAttribute("aria-pressed", state[si] === ci ? "true" : "false");
+        group.appendChild(b);
+      });
+      row.appendChild(group);
+      wrap.appendChild(row);
+    });
+  }
+
+  // ===== 新題型 3：字庫克漏字 =====
+  renderCloze(wrap, q) {
+    const state = this.ui.studyChoices[q.id] || [];
+    this.ui.studyChoices[q.id] = state;
+    const bank = this.shuffledOnce("cloze:" + q.id, q.bank);
+    const para = this.node("p", "wk-cloze");
+    q.text.split(/(\[\[\d+\]\])/).forEach((part) => {
+      const m = part.match(/^\[\[(\d+)\]\]$/);
+      if (!m) {
+        if (part) para.appendChild(document.createTextNode(part));
+        return;
+      }
+      const idx = Number(m[1]);
+      const holder = this.node("span", "wk-cloze-blank");
+      const mark = this.node("span", "wk-step-mark", "");
+      mark.dataset.stepMark = String(idx);
+      const sel = this.node("select", "wk-cloze-select");
+      sel.setAttribute("aria-label", `第 ${idx + 1} 個空格`);
+      const empty = this.node("option", "", "（選）");
+      empty.value = "";
+      sel.appendChild(empty);
+      bank.forEach((w) => {
+        const o = this.node("option", "", w);
+        o.value = w;
+        sel.appendChild(o);
+      });
+      sel.value = state[idx] || "";
+      sel.addEventListener("change", () => (state[idx] = sel.value));
+      this.append(holder, sel, mark);
+      para.appendChild(holder);
+    });
+    wrap.appendChild(this.node("p", "wk-muted wk-small", "點每個空格的選單，從字庫選出正確的詞。"));
+    wrap.appendChild(para);
+  }
+
+  // ===== 新題型 4：圖上點選（熱點） =====
+  renderHotspot(wrap, q) {
+    wrap.appendChild(this.node("p", "wk-muted wk-small", "直接點圖上的位置（鍵盤可用 Tab 移動、Enter 選取）。"));
+    const art = this.node("div", "wk-hotspot");
+    art.innerHTML = q.svg;
+    const picked = this.node("p", "wk-small wk-bold", "");
+    const show = () => {
+      const cur = this.ui.studyChoices[q.id];
+      art.querySelectorAll("[data-hot]").forEach((g) => g.classList.toggle("is-selected", g.dataset.hot === cur));
+      picked.textContent = cur ? `你選的是：${(q.labels && q.labels[cur]) || cur}` : "還沒有選擇。";
+    };
+    art.querySelectorAll("[data-hot]").forEach((g) => {
+      const pick = () => {
+        this.ui.studyChoices[q.id] = g.dataset.hot;
+        show();
+      };
+      g.addEventListener("click", pick);
+      g.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          pick();
+        }
+      });
+    });
+    show();
+    this.append(wrap, art, picked);
+  }
+
+  // ===== 新題型 5：預測 → 觀察 → 解釋 =====
+  renderPoe(wrap, q) {
+    const state = this.ui.studyChoices[q.id] || {};
+    this.ui.studyChoices[q.id] = state;
+    const draw = () => {
+      wrap.replaceChildren();
+      const step1 = this.node("div", "wk-poe-step");
+      step1.appendChild(this.node("p", "wk-bold", q.predictPrompt));
+      const g1 = this.node("div", "wk-option-list");
+      q.predictChoices.forEach((label, i) => {
+        const b = this.btn(
+          label,
+          () => {
+            if (state.observed) return;
+            state.predict = i;
+            draw();
+          },
+          `wk-option ${state.predict === i ? "selected" : ""}`
+        );
+        b.disabled = Boolean(state.observed) && state.predict !== i;
+        b.setAttribute("aria-pressed", state.predict === i ? "true" : "false");
+        g1.appendChild(b);
+      });
+      step1.appendChild(g1);
+      wrap.appendChild(step1);
+
+      const step2 = this.node("div", "wk-poe-step");
+      step2.appendChild(this.node("p", "wk-bold", "② 觀察"));
+      if (!state.observed) {
+        const lockBtn = this.btn(
+          "🔒 鎖定我的預測，看實驗結果",
+          () => {
+            state.observed = true;
+            draw();
+          },
+          "btn btn-accent"
+        );
+        lockBtn.disabled = state.predict === undefined;
+        step2.appendChild(lockBtn);
+        if (state.predict === undefined) step2.appendChild(this.node("p", "wk-muted wk-small", "先在 ① 選一個預測，才能看結果。"));
+      } else {
+        const visual = q.observeVisual ? ElectricVisuals.get(q.observeVisual) : null;
+        if (visual) {
+          const fig = this.node("div", "wk-concept-visual-art");
+          fig.innerHTML = visual.svg;
+          step2.appendChild(fig);
+        }
+        const same = state.predict === q.predictCorrect;
+        step2.appendChild(this.node("p", "wk-reading-action", q.observeText));
+        step2.appendChild(
+          this.node("p", same ? "wk-feedback ok" : "wk-feedback", same ? "🎯 你的預測和觀察結果一致！" : "🤔 結果和你的預測不一樣——沒關係，接著想想為什麼。")
+        );
+      }
+      wrap.appendChild(step2);
+
+      if (state.observed) {
+        const step3 = this.node("div", "wk-poe-step");
+        step3.appendChild(this.node("p", "wk-bold", q.explainPrompt));
+        const g3 = this.node("div", "wk-option-list");
+        this.shuffledOnce("poe-explain:" + q.id, q.explainChoices.map((_, i) => i)).forEach((i) => {
+          const b = this.btn(
+            q.explainChoices[i],
+            () => {
+              state.explain = i;
+              draw();
+            },
+            `wk-option ${state.explain === i ? "selected" : ""}`
+          );
+          b.setAttribute("aria-pressed", state.explain === i ? "true" : "false");
+          g3.appendChild(b);
+        });
+        step3.appendChild(g3);
+        wrap.appendChild(step3);
+      }
+    };
+    draw();
+  }
+
+  // ===== 新題型 6：抓錯題 =====
+  renderSpotError(wrap, q) {
+    const state = this.ui.studyChoices[q.id] || {};
+    this.ui.studyChoices[q.id] = state;
+    const draw = () => {
+      wrap.replaceChildren();
+      wrap.appendChild(this.node("p", "wk-muted wk-small", "① 先點出「錯的那一行」，② 再選正確的改法。"));
+      const sol = this.node("div", "wk-spot-lines");
+      q.lines.forEach((ln, i) => {
+        const b = this.btn(
+          ln,
+          () => {
+            state.line = i;
+            draw();
+          },
+          `wk-spot-line ${state.line === i ? "selected" : ""}`
+        );
+        b.setAttribute("aria-pressed", state.line === i ? "true" : "false");
+        sol.appendChild(b);
+      });
+      wrap.appendChild(sol);
+      if (state.line !== undefined && q.fixChoices) {
+        wrap.appendChild(this.node("p", "wk-bold", "② 這一行應該怎麼改？"));
+        const g = this.node("div", "wk-option-list");
+        this.shuffledOnce("spot-fix:" + q.id, q.fixChoices.map((_, i) => i)).forEach((i) => {
+          const b = this.btn(
+            q.fixChoices[i],
+            () => {
+              state.fix = i;
+              draw();
+            },
+            `wk-option ${state.fix === i ? "selected" : ""}`
+          );
+          b.setAttribute("aria-pressed", state.fix === i ? "true" : "false");
+          g.appendChild(b);
+        });
+        wrap.appendChild(g);
+      }
+    };
+    draw();
   }
 
   renderDrag(wrap, q) {
@@ -1888,6 +2377,71 @@ export class GuidedStudyController {
           q.eliminate.every((i) => answer.indexOf(i) !== -1)
       };
     }
+    if (q.type === "numeric") {
+      const a = answer || {};
+      const n = this.parseNumber(a.num);
+      const e = a.exp === undefined || String(a.exp).trim() === "" ? 0 : this.parseNumber(a.exp);
+      if (!Number.isFinite(n) || !Number.isFinite(e)) {
+        return { valid: false, ok: false, invalidText: "請在數字欄填入數字（例如 4、1.6 或 2.5e19）。" };
+      }
+      if (!a.unit) return { valid: false, ok: false, invalidText: "數字填好了，記得選單位。" };
+      const value = n * Math.pow(10, e);
+      const tol = q.tolerance === undefined ? 0.02 : q.tolerance;
+      const numOk = tol === 0 ? Math.abs(value - q.answer) < 1e-9 * Math.max(1, Math.abs(q.answer)) : Math.abs(value - q.answer) <= Math.abs(q.answer) * tol;
+      const unitOk = a.unit === q.unit;
+      let detail = q.wrong;
+      if (numOk && !unitOk) detail = q.unitWrong || "數字對了！但單位不對，再想想這個量的單位。";
+      else if (!numOk && unitOk) detail = q.wrong + "（單位選對了 👍）";
+      return { valid: true, ok: numOk && unitOk, detail };
+    }
+    if (q.type === "steps") {
+      const a = answer || {};
+      const allChosen = q.steps.every((_, i) => a[i] !== undefined);
+      const marks = q.steps.map((st, i) => a[i] === st.correct);
+      const wrongSteps = q.steps.filter((_, i) => !marks[i]).map((st) => st.label);
+      return {
+        valid: allChosen,
+        ok: marks.every(Boolean),
+        marks,
+        invalidText: "每一步都要選一個答案。",
+        detail: wrongSteps.length ? `再檢查：${wrongSteps.join("、")}。` : q.wrong
+      };
+    }
+    if (q.type === "cloze") {
+      const a = answer || [];
+      const allFilled = q.answers.every((_, i) => Boolean(a[i]));
+      const marks = q.answers.map((ans, i) => a[i] === ans);
+      const wrongCount = marks.filter((m) => !m).length;
+      return {
+        valid: allFilled,
+        ok: wrongCount === 0,
+        marks,
+        invalidText: "每個空格都要選一個詞。",
+        detail: `有 ${wrongCount} 個空格還不對（標 ✗ 的地方）。${q.wrong}`
+      };
+    }
+    if (q.type === "hotspot") {
+      return { valid: Boolean(answer), ok: answer === q.correct, invalidText: "請先在圖上點一個位置。" };
+    }
+    if (q.type === "poe") {
+      const a = answer || {};
+      if (a.predict === undefined) return { valid: false, ok: false, invalidText: "請先完成 ① 預測。" };
+      if (!a.observed) return { valid: false, ok: false, invalidText: "請按「鎖定我的預測，看實驗結果」完成 ② 觀察。" };
+      if (a.explain === undefined) return { valid: false, ok: false, invalidText: "請在 ③ 選一個解釋。" };
+      return { valid: true, ok: a.explain === q.explainCorrect, predictRight: a.predict === q.predictCorrect };
+    }
+    if (q.type === "spoterror") {
+      const a = answer || {};
+      if (a.line === undefined) return { valid: false, ok: false, invalidText: "請先點出錯的那一行。" };
+      if (q.fixChoices && a.fix === undefined) return { valid: false, ok: false, invalidText: "找到了！再選一個正確的改法。" };
+      const lineOk = a.line === q.wrongLine;
+      const fixOk = !q.fixChoices || a.fix === q.fixCorrect;
+      return {
+        valid: true,
+        ok: lineOk && fixOk,
+        detail: !lineOk ? "錯誤不在這一行，再逐行檢查一次。" : "你找到錯的那一行了！但改法還不對。"
+      };
+    }
     return { valid: false, ok: false };
   }
 
@@ -1898,6 +2452,12 @@ export class GuidedStudyController {
     if (q.type === "classify") return q.items.map((item) => `${item} → ${q.correct[item]}`).join("；");
     if (q.type === "order") return q.correct.join(" → ");
     if (q.type === "eliminate") return "消除：" + q.eliminate.map((i) => q.options[i]).join("、");
+    if (q.type === "numeric") return `${q.answer} ${q.unit}（${q.explanation}）`;
+    if (q.type === "steps") return q.steps.map((st) => `${st.label}：${st.choices[st.correct]}`).join("；");
+    if (q.type === "cloze") return q.answers.join("、");
+    if (q.type === "hotspot") return (q.labels && q.labels[q.correct]) || q.correct;
+    if (q.type === "poe") return `預測：${q.predictChoices[q.predictCorrect]}；解釋：${q.explainChoices[q.explainCorrect]}`;
+    if (q.type === "spoterror") return `錯在：${q.lines[q.wrongLine]}；改為：${q.fixChoices[q.fixCorrect]}`;
     return "";
   }
 
@@ -2107,6 +2667,9 @@ export class GuidedStudyController {
         options.appendChild(b);
       });
       box.appendChild(options);
+    } else if (task.type === "lab") {
+      const labName = lesson.lab && LABS[lesson.lab] ? LABS[lesson.lab].title : "互動實驗台";
+      this.append(box, this.node("p", "wk-reading-action", `👉 請先在上方「${labName}」完成操作，再按下方「檢查這一步」按鈕！`));
     } else {
       this.append(box, this.node("p", "wk-reading-action", "👉 請先在上方「🔌 電路觀察器」切換到對應的狀態，再按下方「檢查這一步」按鈕！"));
     }
@@ -2116,13 +2679,16 @@ export class GuidedStudyController {
     const checkBtn = this.btn(
       "檢查這一步",
       () => {
-        const answer = task.type === "choice" ? this.ui.chosen : this.ui.sim;
+        const answer = task.type === "choice" ? this.ui.chosen : task.type === "lab" ? this.labKey(lesson) : this.ui.sim;
         if (!answer) {
           feedback.className = "wk-feedback error";
           feedback.textContent = "請先選一個答案，再檢查。";
           return;
         }
-        const correct = answer === (task.type === "choice" ? task.correct : task.expected);
+        const correct =
+          task.type === "lab"
+            ? this.patternMatch(task.expected, answer)
+            : answer === (task.type === "choice" ? task.correct : task.expected);
         if (correct) {
           const prev = p.answers[task.id] || { attempts: 0, errors: 0, hints: 0 };
           prev.attempts++;
@@ -2133,7 +2699,10 @@ export class GuidedStudyController {
           this.saveStore();
           feedback.className = "wk-feedback ok";
           feedback.textContent =
-            "✅ " + (task.type === "choice" ? task.choices.find((x) => x.id === answer).feedback : "做到了！你選出的電路狀態符合這一步。");
+            "✅ " +
+            (task.type === "choice"
+              ? task.choices.find((x) => x.id === answer).feedback
+              : task.okText || "做到了！你選出的電路狀態符合這一步。");
           checkBtn.disabled = true;
           hintBtn.disabled = true;
           const nextBtn = this.btn(
@@ -2164,7 +2733,11 @@ export class GuidedStudyController {
           feedback.className = "wk-feedback error";
           feedback.textContent =
             "❌ " +
-            (task.type === "choice" ? task.choices.find((x) => x.id === answer).feedback : "再觀察一次：目前「電路觀察器」的狀態尚未符合任務要求。");
+            (task.type === "choice"
+              ? task.choices.find((x) => x.id === answer).feedback
+              : task.type === "lab"
+              ? "再看一次題目：目前實驗台的狀態還不符合這一步的要求。"
+              : "再觀察一次：目前「電路觀察器」的狀態尚未符合任務要求。");
           if (this.ui.wrong >= 2) feedback.textContent += " 💡 提示：" + task.hint;
         }
       },
@@ -2248,15 +2821,28 @@ export class GuidedStudyController {
         "btn"
       )
     );
+    const weekData = WEEKS[this.weekNo] || WEEK01;
+    const next = WEEK_NEXT[this.weekNo];
     if (this.lessonNo === 1) {
       row.appendChild(
         this.btn(
-          "繼續第 2 節（通路、斷路與短路） →",
+          `繼續第 2 節（${weekData[2].title}） →`,
           () => {
             this.lessonNo = 2;
             this.ui.studyIndex = 0;
             this.ui.task = 0;
             rerender();
+          },
+          "btn btn-primary"
+        )
+      );
+    } else if (next) {
+      row.appendChild(
+        this.btn(
+          next.label,
+          () => {
+            if (this.app.scene3D) this.app.scene3D.flyToIsland(next.islandId);
+            this.app.openIslandDrawer(next.islandId, next.tab);
           },
           "btn btn-primary"
         )
@@ -2292,7 +2878,7 @@ export class GuidedStudyController {
       return;
     }
 
-    if (islandId !== "island-03" && !this.ui.previewWeek01OnOtherIsland) {
+    if (!this.syncWeekForIsland(islandId)) {
       this.renderPlannedIslandOverview(wrap, islandId, "teacher");
       if (this.app && this.app.cloudTracker) {
         const warRoomMount = this.node("div", "wk-war-room-mount");
@@ -2303,7 +2889,7 @@ export class GuidedStudyController {
       return;
     }
 
-    if (islandId !== "island-03") {
+    if (this.ui.previewWeek01OnOtherIsland && !this.openWeeksFor(islandId).includes(1)) {
       const notice = this.node("div", "mascot-tip-box");
       notice.innerHTML = `
         <div style="font-size:1.6rem;">👨‍🏫</div>
@@ -2319,15 +2905,23 @@ export class GuidedStudyController {
       });
     }
 
-    const lesson = WEEK01[this.lessonNo];
+    const teacherRerender = () => this.renderTeacherGuidedTab(container, islandId);
+    this.renderWeekSwitcher(wrap, islandId, teacherRerender);
+    const lesson = this.currentLesson();
     const p = this.progressFor(lesson);
 
     const hero = this.node("div", "wk-hero");
     this.append(
       hero,
-      this.node("div", "wk-eyebrow", `第 1 週 · 第 ${this.lessonNo} 節 · 👨‍🏫 教師課堂講解與備課引導`),
+      this.node("div", "wk-eyebrow", `第 ${this.weekNo} 週 · 第 ${this.lessonNo} 節 · 👨‍🏫 教師課堂講解與備課引導`),
       this.node("h3", "", `${lesson.title}（教師講解頁）`),
-      this.node("p", "", "可在課堂投影逐張點開概念講解卡，搭配小馬達示範模擬器、手寫白板與課本畫重點解答總覽。")
+      this.node(
+        "p",
+        "",
+        lesson.lab
+          ? "可在課堂投影逐張點開概念講解卡，搭配互動實驗台示範、手寫白板與課本畫重點解答總覽。"
+          : "可在課堂投影逐張點開概念講解卡，搭配小馬達示範模擬器、手寫白板與課本畫重點解答總覽。"
+      )
     );
     wrap.appendChild(hero);
 
@@ -2335,7 +2929,7 @@ export class GuidedStudyController {
     const tabBar = this.node("div", "wk-lesson-tabs");
     [1, 2].forEach((n) => {
       const b = this.btn(
-        `第 ${n} 節｜${WEEK01[n].title}`,
+        `第 ${n} 節｜${(WEEKS[this.weekNo] || WEEK01)[n].title}`,
         () => {
           this.lessonNo = n;
           this.ui.guide = 0;
@@ -2424,12 +3018,14 @@ export class GuidedStudyController {
 
     this.append(
       rightDemo,
-      this.node("h3", "", "⚙️ 教師示範｜小馬達電路模擬器"),
+      this.node("h3", "", lesson.teacher.demoTitle || "⚙️ 教師示範｜小馬達電路模擬器"),
       this.node("p", "wk-bold", lesson.teacher.demoQuestion)
     );
-    this.renderSimulatorBox(rightDemo, true, () => {
-      this.renderTeacherGuidedTab(container, islandId);
-    });
+    if (lesson.lab && LABS[lesson.lab]) {
+      this.renderLabBox(rightDemo, lesson, teacherRerender);
+    } else {
+      this.renderSimulatorBox(rightDemo, true, teacherRerender);
+    }
     const demoDetails = this.node("details", "wk-details");
     demoDetails.open = true;
     demoDetails.appendChild(this.node("summary", "", "展開課堂示範步驟"));
@@ -2555,7 +3151,7 @@ export class GuidedStudyController {
     this.append(
       supportCard,
       this.node("h3", "", "📊 課堂觀察重點、出口小卡與本機紀錄"),
-      this.node("p", "", "學生操作相同概念，但題目採「車燈」情境；教師示範採「小馬達」情境。"),
+      this.node("p", "", lesson.teacher.note || "學生操作相同概念，但題目採「車燈」情境；教師示範採「小馬達」情境。"),
       this.node("p", "wk-bold", this.statusSummary(lesson, p))
     );
     const errors = lesson.tasks.filter((t) => p.answers[t.id] && p.answers[t.id].errors > 0).map((t) => t.prompt);

@@ -2154,72 +2154,143 @@ export class GuidedStudyController {
     draw();
   }
 
+  // ===== 拖放共用：卡片放入後從上方消失，點框內卡片（或拖回上方）即可放回 =====
+  makeDndChip(label, opts) {
+    const b = this.btn(opts.placed ? `${label}  ✕` : label, opts.onClick, `wk-chip ${opts.placed ? "wk-chip-placed" : ""} ${opts.selected ? "selected" : ""}`);
+    b.title = opts.placed ? "放錯了？點一下就會放回上方" : "拖曳到下方的框；或先點一下，再點下方的框";
+    b.setAttribute("aria-pressed", opts.selected ? "true" : "false");
+    b.draggable = true;
+    b.addEventListener("dragstart", (e) => {
+      e.dataTransfer.setData("text/plain", opts.payload);
+      e.dataTransfer.effectAllowed = "move";
+      b.classList.add("is-dragging");
+    });
+    b.addEventListener("dragend", () => b.classList.remove("is-dragging"));
+    return b;
+  }
+
+  makeDropZone(el, onDrop) {
+    el.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      el.classList.add("is-over");
+    });
+    el.addEventListener("dragleave", (e) => {
+      if (!el.contains(e.relatedTarget)) el.classList.remove("is-over");
+    });
+    el.addEventListener("drop", (e) => {
+      e.preventDefault();
+      el.classList.remove("is-over");
+      onDrop(e.dataTransfer.getData("text/plain"));
+    });
+  }
+
+  makeBucket(title, chips, ready, onPick) {
+    const box = this.node("div", `wk-bucket ${ready ? "is-ready" : ""}`);
+    box.tabIndex = 0;
+    box.setAttribute("role", "button");
+    box.setAttribute("aria-label", `${title}：${ready ? "點一下把選取的卡片放進來" : "放置區"}`);
+    box.appendChild(this.node("div", "wk-bucket-title", title));
+    const body = this.node("div", "wk-bucket-body");
+    if (chips.length) chips.forEach((c) => body.appendChild(c));
+    else body.appendChild(this.node("span", "wk-bucket-empty", ready ? "👉 點這裡放入" : "拖到這裡"));
+    box.appendChild(body);
+    const pick = (e) => {
+      if (e.target.closest && e.target.closest(".wk-chip")) return;
+      onPick();
+    };
+    box.addEventListener("click", pick);
+    box.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        pick(e);
+      }
+    });
+    return box;
+  }
+
+  dndHeader(wrap, hasPlaced, onReset) {
+    const row = this.node("div", "wk-dnd-help");
+    row.appendChild(
+      this.node(
+        "p",
+        "wk-muted wk-small",
+        "把上面的卡片拖進下方正確的框（手機請先點卡片、再點框）。放錯了？點框裡的卡片，或把它拖回上方，就會放回去。"
+      )
+    );
+    if (hasPlaced) row.appendChild(this.btn("↺ 全部放回", onReset, "btn btn-sm"));
+    wrap.appendChild(row);
+  }
+
+  dndPool(remainingChips, onDrop) {
+    const pool = this.node("div", "wk-chip-pool wk-pool-zone");
+    if (remainingChips.length) remainingChips.forEach((c) => pool.appendChild(c));
+    else pool.appendChild(this.node("span", "wk-bucket-empty", "✅ 卡片都放好了！確認沒問題就按「檢查答案」。"));
+    this.makeDropZone(pool, onDrop);
+    return pool;
+  }
+
   renderDrag(wrap, q) {
     const state = this.ui.studyChoices[q.id] || {};
     this.ui.studyChoices[q.id] = state;
     let chosen = null;
-    const chips = this.shuffledOnce(
-      "drag-chips:" + q.id,
-      q.pairs.map((pair) => pair[0])
-    );
+    const chips = this.shuffledOnce("drag-chips:" + q.id, q.pairs.map((pair) => pair[0]));
     const targetOrder = this.shuffledDifferent(
       "drag-targets:" + q.id,
       q.pairs.map((_, i) => i),
       q.pairs.map((_, i) => i)
     );
-    const assign = (index, chip) => {
-      if (!q.pairs.some((pair) => pair[0] === chip)) return;
+    const unplace = (chip) => {
       Object.keys(state).forEach((k) => {
         if (state[k] === chip) delete state[k];
       });
-      state[index] = chip;
+    };
+    const assign = (index, chip) => {
+      if (!q.pairs.some((pair) => pair[0] === chip)) return;
+      unplace(chip);
+      state[index] = chip; // 若原本有卡片，會被換回上方
+      chosen = null;
+      draw();
+    };
+    const returnChip = (chip) => {
+      if (!chip) return;
+      unplace(chip);
       chosen = null;
       draw();
     };
     const draw = () => {
       wrap.replaceChildren();
-      this.append(
-        wrap,
-        this.node("p", "wk-muted wk-small", "拖曳元件到工作區；也可先點元件，再點工作區。點已放入的工作區可取回。")
-      );
-      const pool = this.node("div", "wk-chip-pool");
-      chips.forEach((chip) => {
-        const b = this.btn(
-          chip,
-          () => {
-            chosen = chip;
-            draw();
-          },
-          `wk-chip ${chosen === chip ? "selected" : ""}`
-        );
-        b.draggable = true;
-        b.addEventListener("dragstart", (e) => e.dataTransfer.setData("text/plain", chip));
-        pool.appendChild(b);
+      const placed = Object.values(state);
+      this.dndHeader(wrap, placed.length > 0, () => {
+        Object.keys(state).forEach((k) => delete state[k]);
+        chosen = null;
+        draw();
       });
-      wrap.appendChild(pool);
-
-      const targets = this.node("div", "wk-target-grid");
-      targetOrder.forEach((index) => {
-        const pair = q.pairs[index];
-        const target = this.btn(
-          `${pair[1]} ← ${state[index] || "【點此放入元件】"}`,
-          () => {
-            if (chosen) assign(index, chosen);
-            else if (state[index]) {
-              delete state[index];
+      const remaining = chips
+        .filter((c) => placed.indexOf(c) === -1)
+        .map((chip) =>
+          this.makeDndChip(chip, {
+            payload: chip,
+            selected: chosen === chip,
+            onClick: () => {
+              chosen = chosen === chip ? null : chip;
               draw();
             }
-          },
-          "wk-drop-target"
+          })
         );
-        target.addEventListener("dragover", (e) => e.preventDefault());
-        target.addEventListener("drop", (e) => {
-          e.preventDefault();
-          assign(index, e.dataTransfer.getData("text/plain"));
+      wrap.appendChild(this.dndPool(remaining, returnChip));
+      const grid = this.node("div", "wk-bucket-grid");
+      targetOrder.forEach((index) => {
+        const current = state[index];
+        const inner = current
+          ? [this.makeDndChip(current, { payload: current, placed: true, onClick: () => returnChip(current) })]
+          : [];
+        const box = this.makeBucket(q.pairs[index][1], inner, Boolean(chosen), () => {
+          if (chosen) assign(index, chosen);
         });
-        targets.appendChild(target);
+        this.makeDropZone(box, (chip) => assign(index, chip));
+        grid.appendChild(box);
       });
-      wrap.appendChild(targets);
+      wrap.appendChild(grid);
     };
     draw();
   }
@@ -2294,49 +2365,45 @@ export class GuidedStudyController {
     let chosen = null;
     const itemOrder = this.shuffledOnce("classify-items:" + q.id, q.items);
     const categoryOrder = this.shuffledOnce("classify-categories:" + q.id, q.categories);
-    const assign = (category, item) => {
+    const place = (item, category) => {
       if (q.items.indexOf(item) === -1) return;
-      state[item] = category;
+      if (category) state[item] = category;
+      else delete state[item];
       chosen = null;
       draw();
     };
     const draw = () => {
       wrap.replaceChildren();
-      this.append(wrap, this.node("p", "wk-muted wk-small", "分類與例子已打亂。請先點選例子（或拖曳），再點下方的分類區放入。"));
-      const pool = this.node("div", "wk-chip-pool");
-      itemOrder.forEach((item) => {
-        const b = this.btn(
-          item + (state[item] ? `（已分至：${state[item]}）` : ""),
-          () => {
-            chosen = item;
-            draw();
-          },
-          `wk-chip ${chosen === item ? "selected" : ""}`
-        );
-        b.draggable = true;
-        b.addEventListener("dragstart", (e) => e.dataTransfer.setData("text/plain", item));
-        pool.appendChild(b);
+      this.dndHeader(wrap, Object.keys(state).length > 0, () => {
+        Object.keys(state).forEach((k) => delete state[k]);
+        chosen = null;
+        draw();
       });
-      wrap.appendChild(pool);
-
-      const buckets = this.node("div", "wk-target-grid");
+      const remaining = itemOrder
+        .filter((item) => !state[item])
+        .map((item) =>
+          this.makeDndChip(item, {
+            payload: item,
+            selected: chosen === item,
+            onClick: () => {
+              chosen = chosen === item ? null : item;
+              draw();
+            }
+          })
+        );
+      wrap.appendChild(this.dndPool(remaining, (item) => place(item, null)));
+      const grid = this.node("div", "wk-bucket-grid");
       categoryOrder.forEach((category) => {
-        const assigned = q.items.filter((item) => state[item] === category);
-        const b = this.btn(
-          `${category}：${assigned.length ? assigned.join("、") : "【點此放入例子】"}`,
-          () => {
-            if (chosen) assign(category, chosen);
-          },
-          "wk-drop-target"
-        );
-        b.addEventListener("dragover", (e) => e.preventDefault());
-        b.addEventListener("drop", (e) => {
-          e.preventDefault();
-          assign(category, e.dataTransfer.getData("text/plain"));
+        const inner = itemOrder
+          .filter((item) => state[item] === category)
+          .map((item) => this.makeDndChip(item, { payload: item, placed: true, onClick: () => place(item, null) }));
+        const box = this.makeBucket(category, inner, Boolean(chosen), () => {
+          if (chosen) place(chosen, category);
         });
-        buckets.appendChild(b);
+        this.makeDropZone(box, (item) => place(item, category));
+        grid.appendChild(box);
       });
-      wrap.appendChild(buckets);
+      wrap.appendChild(grid);
     };
     draw();
   }

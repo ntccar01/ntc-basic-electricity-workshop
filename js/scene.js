@@ -178,13 +178,17 @@ export class ArchipelagoScene {
   setDefaultPanoramaGoal() {
     const isMobile = window.innerWidth <= 640;
     const isTablet = window.innerWidth <= 900 && !isMobile;
-    this.cameraTargetGoal.set(0, 1.5, 2);
+    // 群島（含第 4 課島）南北範圍約 z = -27 ～ +38，視線中心放在 z≈8，整座群島才會落在畫面正中央
+    this.cameraTargetGoal.set(0, 1.5, 8);
+    // 螢幕越矮（例如筆電＋150% 縮放），鏡頭稍微拉遠，避免上下島被工具列擋住
+    const h = window.innerHeight;
+    const k = h < 600 ? 1.25 : h < 760 ? 1.13 : 1;
     if (isMobile) {
-      this.cameraPosGoal.set(0, 58, 86);
+      this.cameraPosGoal.set(0, 70, 112);
     } else if (isTablet) {
-      this.cameraPosGoal.set(0, 48, 74);
+      this.cameraPosGoal.set(0, 6 + 42 * k, 8 + 66 * k);
     } else {
-      this.cameraPosGoal.set(0, 40, 62);
+      this.cameraPosGoal.set(0, 1.5 + 38.5 * k, 8 + 60 * k);
     }
   }
 
@@ -759,6 +763,17 @@ export class ArchipelagoScene {
       this.isFlying = false;
     });
 
+    // 在空白海面連點兩下：飛回置中全景
+    this.canvas.addEventListener("dblclick", (e) => {
+      const rect = this.canvas.getBoundingClientRect();
+      const mouse = new THREE.Vector2(
+        ((e.clientX - rect.left) / rect.width) * 2 - 1,
+        -((e.clientY - rect.top) / rect.height) * 2 + 1
+      );
+      this.raycaster.setFromCamera(mouse, this.camera);
+      if (!this.raycaster.intersectObjects(this.islandMeshes, true).length) this.resetView();
+    });
+
     this.canvas.addEventListener("pointerdown", (e) => {
       this.pointerDownPos = { x: e.clientX, y: e.clientY };
     });
@@ -874,10 +889,32 @@ export class ArchipelagoScene {
     const dt = Math.min(this.clock.getDelta(), 0.1);
     const elapsed = this.clock.getElapsedTime();
 
+    // 限制平移範圍：避免拖曳後整座群島跑出畫面中央太遠
+    if (!this.isFlying && this.controls) {
+      const t = this.controls.target;
+      const maxR = 24;
+      const r = Math.hypot(t.x, t.z);
+      if (r > maxR) {
+        const k = maxR / r;
+        const dx = t.x * k - t.x;
+        const dz = t.z * k - t.z;
+        t.x += dx;
+        t.z += dz;
+        this.camera.position.x += dx;
+        this.camera.position.z += dz;
+      }
+    }
+
     if (this.isFlying && !this.reducedMotion) {
       this.camera.position.lerp(this.cameraPosGoal, 0.08);
       this.controls.target.lerp(this.cameraTargetGoal, 0.08);
-      if (this.camera.position.distanceTo(this.cameraPosGoal) < 0.25) {
+      if (
+        this.camera.position.distanceTo(this.cameraPosGoal) < 0.25 &&
+        this.controls.target.distanceTo(this.cameraTargetGoal) < 0.25
+      ) {
+        // 抵達時精準對齊，避免停在偏一邊的位置
+        this.camera.position.copy(this.cameraPosGoal);
+        this.controls.target.copy(this.cameraTargetGoal);
         this.isFlying = false;
       }
     }
